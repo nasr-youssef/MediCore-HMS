@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCore — Login</title>
+
+<style>
+ :root {
+  --teal:        #0d6e72;
+  --teal-dark:   #094f52;
+  --teal-mid:    #0f8589;
+  --teal-light:  #e6f4f5;
+  --teal-soft:   #f0fafb;
+  --mint:        #10b981;
+  --gold:        #b8860b;
+  --white:       #ffffff;
+  --gray-50:     #f8fafc;
+  --gray-100:    #f1f5f9;
+  --gray-200:    #e2e8f0;
+  --gray-400:    #94a3b8;
+  --gray-600:    #475569;
+  --gray-800:    #1e293b;
+  --red:         #dc2626;
+  --red-light:   #fef2f2;
+  --shadow-lg:   0 12px 40px rgba(13,110,114,0.15), 0 4px 12px rgba(0,0,0,0.08);
+  --radius:      12px;
+  --radius-lg:   20px;
+  --font:        'Plus Jakarta Sans', 'Noto Sans Arabic', sans-serif;
+  --ease:        cubic-bezier(0.4, 0, 0.2, 1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:var(--gray-50);font-family:var(--font);display:flex;overflow:hidden;color:var(--gray-800)}
+
+/* LEFT PANEL */
+.left-panel{width:420px;flex-shrink:0;background:linear-gradient(160deg,var(--teal-dark) 0%,var(--teal) 60%,var(--teal-mid) 100%);display:flex;flex-direction:column;justify-content:space-between;padding:48px 44px;position:relative;overflow:hidden}
+.left-panel::before{content:'';position:absolute;width:320px;height:320px;border-radius:50%;border:1px solid rgba(255,255,255,0.07);top:-80px;right:-80px}
+.left-panel::after{content:'';position:absolute;width:220px;height:220px;border-radius:50%;border:1px solid rgba(255,255,255,0.07);bottom:80px;left:-60px}
+.panel-top{position:relative;z-index:1}
+.ministry-row{display:flex;align-items:center;gap:10px;margin-bottom:52px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.12)}
+.ministry-eagle{font-size:22px}
+.ministry-ar{font-family:'Noto Sans Arabic',sans-serif;font-size:12px;font-weight:600;color:rgba(255,255,255,0.85);line-height:1.6}
+.ministry-en{font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:0.3px}
+.logo-wrap{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.logo-icon{width:52px;height:52px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.logo-text-main{font-size:26px;font-weight:800;color:#fff;letter-spacing:-0.5px;line-height:1}
+.logo-text-main span{color:rgba(255,255,255,0.5);font-weight:300}
+.logo-text-sub{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.panel-tagline{font-size:27px;font-weight:700;color:#fff;line-height:1.35;letter-spacing:-0.5px;margin-bottom:14px}
+.panel-tagline em{font-style:normal;color:rgba(255,255,255,0.45);font-weight:300}
+.panel-desc{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.75;max-width:300px}
+.panel-middle{position:relative;z-index:1}
+.stats-row{display:flex;gap:8px;margin-bottom:28px}
+.stat-pill{flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 10px;text-align:center}
+.stat-pill-num{font-size:20px;font-weight:800;color:#fff;line-height:1;margin-bottom:4px}
+.stat-pill-num small{font-size:12px;color:rgba(255,255,255,0.45);font-weight:400}
+.stat-pill-label{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:0.5px;text-transform:uppercase}
+.features-list{display:flex;flex-direction:column;gap:7px}
+.feat{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;transition:background 0.2s;cursor:default}
+.feat:hover{background:rgba(255,255,255,0.1)}
+.feat-icon{width:28px;height:28px;background:rgba(255,255,255,0.1);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.feat-text{font-size:12.5px;color:rgba(255,255,255,0.72);font-weight:500}
+.panel-bottom{position:relative;z-index:1;font-size:11px;color:rgba(255,255,255,0.3);padding-top:20px;border-top:1px solid rgba(255,255,255,0.08)}
+
+/* RIGHT AREA */
+.right-area{flex:1;display:flex;align-items:center;justify-content:center;padding:40px;background:var(--gray-50);position:relative}
+.right-area::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,var(--gray-200) 1px,transparent 1px);background-size:28px 28px;opacity:0.5}
+.login-wrap{position:relative;z-index:1;width:100%;max-width:420px}
+.welcome-text{text-align:center;margin-bottom:24px;opacity:0;transform:translateY(-10px);animation:fadeUp 0.5s var(--ease) 0.1s forwards}
+.welcome-text h2{font-size:23px;font-weight:700;color:var(--gray-800);letter-spacing:-0.5px;margin-bottom:4px}
+.welcome-text p{font-size:14px;color:var(--gray-400)}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--gray-200);box-shadow:var(--shadow-lg);padding:36px 36px 30px;opacity:0;transform:translateY(12px);animation:fadeUp 0.5s var(--ease) 0.2s forwards}
+.card-bar{height:4px;background:linear-gradient(90deg,var(--teal),var(--teal-mid),var(--mint));margin:-36px -36px 30px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.err-box{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--red-light);border:1px solid rgba(220,38,38,0.2);border-radius:8px;color:var(--red);font-size:13px;font-weight:500;margin-bottom:0;opacity:0;max-height:0;overflow:hidden;transition:all 0.3s var(--ease)}
+.err-box.show{opacity:1;max-height:60px;margin-bottom:16px}
+.field{margin-bottom:17px}
+.field-label{display:block;font-size:12.5px;font-weight:600;color:var(--gray-600);margin-bottom:6px}
+.field-wrap{position:relative}
+.field-input{width:100%;padding:11px 14px 11px 40px;border:1.5px solid var(--gray-200);border-radius:var(--radius);font-size:14px;font-family:var(--font);color:var(--gray-800);background:var(--white);outline:none;transition:all 0.2s var(--ease)}
+.field-input::placeholder{color:var(--gray-400);font-size:13px}
+.field-input:hover{border-color:var(--gray-400)}
+.field-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,110,114,0.1)}
+.field-input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,0.08)}
+.field-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--gray-400);pointer-events:none;transition:color 0.2s}
+.field-wrap:focus-within .field-ico{color:var(--teal)}
+.pw-btn{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:13px;padding:4px;transition:color 0.2s;line-height:1}
+.pw-btn:hover{color:var(--teal)}
+.opts{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.remember{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:var(--gray-600);user-select:none}
+.remember input{width:15px;height:15px;accent-color:var(--teal);cursor:pointer}
+.forgot{font-size:12.5px;color:var(--teal);font-weight:600;background:none;border:none;cursor:pointer;transition:color 0.2s}
+.forgot:hover{color:var(--teal-dark)}
+.login-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--teal),var(--teal-mid));color:var(--white);border:none;border-radius:var(--radius);font-size:15px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all 0.25s var(--ease);box-shadow:0 4px 14px rgba(13,110,114,0.3);position:relative;overflow:hidden}
+.login-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,0.12),transparent);transform:translateX(-100%);transition:transform 0.4s}
+.login-btn:hover::after{transform:translateX(100%)}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,110,114,0.4)}
+.login-btn:active{transform:translateY(0)}
+.login-btn:disabled{opacity:0.65;cursor:not-allowed;transform:none;box-shadow:none}
+.divider{display:flex;align-items:center;gap:10px;margin:20px 0}
+.div-line{flex:1;height:1px;background:var(--gray-200)}
+.div-label{font-size:11px;color:var(--gray-400);font-weight:600;letter-spacing:0.5px;white-space:nowrap}
+.demo-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.demo-btn{padding:10px 6px;border-radius:10px;border:1.5px solid var(--gray-200);background:var(--gray-50);color:var(--gray-800);font-family:var(--font);cursor:pointer;transition:all 0.2s var(--ease);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600}
+.demo-btn:hover{border-color:var(--teal);background:var(--teal-light);color:var(--teal-dark);transform:translateY(-2px);box-shadow:0 2px 8px rgba(13,110,114,0.12)}
+.demo-btn .ico{font-size:18px}
+.demo-btn .sub{font-size:10px;color:var(--gray-400);font-weight:400}
+.demo-btn:hover .sub{color:var(--teal)}
+.secure{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;font-size:11px;color:var(--gray-400)}
+.secure-dot{width:6px;height:6px;border-radius:50%;background:var(--mint)}
+@media(max-width:900px){body{flex-direction:column}.left-panel{width:100%;min-height:auto;padding:24px 24px 20px}.panel-tagline{font-size:20px}.features-list,.stats-row{display:none}.right-area{padding:24px 16px}}
+@media(max-width:480px){.card{padding:26px 20px 22px}}
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <div class="panel-top">
+    <div class="ministry-row">
+      <span class="ministry-eagle">🦅</span>
+      <div>
+        <div class="ministry-ar">وزارة الصحة والسكان</div>
+        <div class="ministry-en">Ministry of Health & Population — Egypt</div>
+      </div>
+    </div>
+    <div class="logo-wrap">
+      <div class="logo-icon">🏥</div>
+      <div>
+        <div class="logo-text-main">Medi<span>Core</span></div>
+        <div class="logo-text-sub">Hospital Management System</div>
+      </div>
+    </div>
+    <div class="panel-tagline">Better care starts<br><em>with better tools.</em></div>
+    <p class="panel-desc">A unified platform connecting administrators, doctors, and patients across Egyptian hospitals.</p>
+  </div>
+
+  <div class="panel-middle">
+    <div class="stats-row">
+      <div class="stat-pill"><div class="stat-pill-num">23<small>+</small></div><div class="stat-pill-label">Modules</div></div>
+      <div class="stat-pill"><div class="stat-pill-num">3</div><div class="stat-pill-label">Roles</div></div>
+      <div class="stat-pill"><div class="stat-pill-num" style="font-size:15px">AI</div><div class="stat-pill-label">Powered</div></div>
+    </div>
+    <div class="features-list">
+      <div class="feat"><div class="feat-icon">📅</div><div class="feat-text">Appointment & Calendar Management</div></div>
+      <div class="feat"><div class="feat-icon">🏥</div><div class="feat-text">Real-time Bed Management</div></div>
+      <div class="feat"><div class="feat-icon">📋</div><div class="feat-text">Digital Medical Records Timeline</div></div>
+      <div class="feat"><div class="feat-icon">💳</div><div class="feat-text">Billing & Invoice Tracking</div></div>
+      <div class="feat"><div class="feat-icon">🤖</div><div class="feat-text">MediBot AI Patient Assistant</div></div>
+    </div>
+  </div>
+
+  <div class="panel-bottom">© 2026 MediCore HMS · Secured · Ministry of Health Egypt</div>
+</div>
+
+<div class="right-area">
+  <div class="login-wrap">
+    <div class="welcome-text">
+      <h2>Welcome back</h2>
+      <p>Sign in to continue to your dashboard</p>
+    </div>
+    <div class="card">
+      <div class="card-bar"></div>
+      <div class="err-box" id="errBox"><span>⚠️</span><span id="errText">Invalid email or password.</span></div>
+      <div class="field">
+        <label class="field-label" for="email">Email Address</label>
+        <div class="field-wrap">
+          <span class="field-ico">✉️</span>
+          <input class="field-input" type="email" id="email" placeholder="user@hospital.gov.eg" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('pw').focus()">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="pw">Password</label>
+        <div class="field-wrap">
+          <span class="field-ico">🔒</span>
+          <input class="field-input" type="password" id="pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="pw-btn" type="button" onclick="togglePw()" id="pwBtn">👁</button>
+        </div>
+      </div>
+      <div class="opts">
+        <label class="remember"><input type="checkbox" id="rememberMe"><span>Remember me for 7 days</span></label>
+        <button class="forgot" onclick="showToast('Coming soon','info')">Forgot password?</button>
+      </div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">Sign In →</button>
+      <div class="divider"><div class="div-line"></div><span class="div-label">QUICK DEMO</span><div class="div-line"></div></div>
+      <div class="demo-row">
+        <button class="demo-btn" onclick="fill('admin@hospital.gov.eg','admin123')"><span class="ico">👑</span><span>Admin</span><span class="sub">Full Access</span></button>
+        <button class="demo-btn" onclick="fill('doctor@hospital.gov.eg','doctor123')"><span class="ico">🩺</span><span>Doctor</span><span class="sub">Clinical</span></button>
+        <button class="demo-btn" onclick="fill('patient@hospital.gov.eg','patient123')"><span class="ico">👤</span><span>Patient</span><span class="sub">Portal</span></button>
+      </div>
+      <div class="secure"><div class="secure-dot"></div><span>Secured connection · Ministry of Health Egypt</span></div>
+      <div style="text-align:center;margin-top:10px;font-size:13px;color:var(--muted)">Don't have an account? <a href="medicore-register.html" style="color:var(--teal);font-weight:600;text-decoration:none">Create Account</a></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);padding:11px 22px;border-radius:50px;font-size:13px;font-family:var(--font);font-weight:500;z-index:999;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);opacity:0;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,0.12);white-space:nowrap;color:#fff"></div>
+
+<script>
+'use strict';
+
+var API_BASE = 'http://localhost/MediCore/';
+
+async function doLogin(){
+    var email = document.getElementById('email').value.trim().toLowerCase();
+    var pass = document.getElementById('pw').value;
+    var btn = document.getElementById('loginBtn');
+
+    clearErr();
+
+    if(!email || !pass){
+        showErr('Please enter your email and password.');
+        return;
+    }
+
+    btn.textContent = '⏳ Signing in...';
+    btn.disabled = true;
+
+    try{
+        let response = await fetch(API_BASE + "Login.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email, password: pass })
+        });
+
+        let data = await response.json();
+
+        if(data.success){
+            let user = data.user;
+
+            // Save user data to localStorage for dashboard pages
+            localStorage.setItem('medicore_user', JSON.stringify(user));
+
+            btn.textContent = '✓ Welcome!';
+            btn.style.background='linear-gradient(135deg,#059669,#047857)';
+            showToast('Welcome, ' + user.name + '!','success');
+
+            setTimeout(function(){
+                if(user.role === "admin"){
+                    window.location.href = "medicore-admin.html";
+                }else if(user.role === "doctor"){
+                    window.location.href = "medicore-doctor.html";
+                }else{
+                    window.location.href = "medicore-patient.html";
+                }
+            },1200);
+
+        }else{
+            showErr(data.error || 'Invalid email or password.');
+            document.getElementById('email').classList.add('err');
+            document.getElementById('pw').classList.add('err');
+            btn.textContent='Sign In →';
+            btn.disabled=false;
+        }
+
+    }catch(error){
+        console.error('Login error:', error);
+        showErr('Server connection error. Make sure XAMPP is running.');
+        btn.textContent='Sign In →';
+        btn.disabled=false;
+    }
+}
+
+function fill(email,pass){
+    document.getElementById('email').value=email;
+    document.getElementById('pw').value=pass;
+    clearErr();
+}
+function togglePw(){
+  var i=document.getElementById('pw'),b=document.getElementById('pwBtn');
+  i.type=i.type==='password'?'text':'password';
+  b.textContent=i.type==='password'?'👁':'🙈';
+}
+function clearErr(){
+  document.getElementById('errBox').classList.remove('show');
+  document.getElementById('email').classList.remove('err');
+  document.getElementById('pw').classList.remove('err');
+}
+function showErr(msg){
+  document.getElementById('errText').textContent=msg;
+  document.getElementById('errBox').classList.add('show');
+}
+var _t;
+function showToast(msg,type){
+  var el=document.getElementById('toast');
+  var c={success:'#059669',info:'#0d6e72',warn:'#d97706',error:'#dc2626'};
+  el.textContent=msg;el.style.background=c[type]||c.info;
+  el.style.transform='translateX(-50%) translateY(0)';el.style.opacity='1';
+  clearTimeout(_t);_t=setTimeout(function(){el.style.transform='translateX(-50%) translateY(60px)';el.style.opacity='0';},3000);
+}
+</script>
+</body>
+</html>

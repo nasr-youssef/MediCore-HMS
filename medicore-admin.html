@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCore — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --teal:       #0d6e72;
+  --teal-dark:  #094f52;
+  --teal-mid:   #0f8589;
+  --teal-light: #e6f4f5;
+  --mint:       #00897b;
+  --navy:       #0d2e5e;
+  --white:      #ffffff;
+  --bg:         #f0f4f8;
+  --surface:    #ffffff;
+  --surface2:   #f8fafc;
+  --border:     #e2e8f0;
+  --text:       #1e293b;
+  --muted:      #64748b;
+  --light-muted:#94a3b8;
+  --red:        #dc2626;
+  --red-bg:     #fef2f2;
+  --amber:      #d97706;
+  --amber-bg:   #fffbeb;
+  --green:      #059669;
+  --green-bg:   #f0fdf4;
+  --blue:       #1565c0;
+  --blue-bg:    #eff6ff;
+  --sidebar-w:  240px;
+  --topbar-h:   60px;
+  --font:       'Plus Jakarta Sans', 'Noto Sans Arabic', sans-serif;
+  --radius:     10px;
+  --radius-lg:  16px;
+  --shadow:     0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(13,110,114,0.07);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.05);
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+/* ══ SIDEBAR ══════════════════════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-brand {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  width: 36px; height: 36px;
+  background: var(--teal);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+
+.brand-name {
+  font-size: 17px; font-weight: 800;
+  color: #fff; letter-spacing: -0.3px;
+}
+.brand-name span { color: rgba(255,255,255,0.45); font-weight: 300; }
+
+.sidebar-section {
+  padding: 16px 12px 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  margin: 1px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+
+.nav-item.active {
+  background: var(--teal);
+  color: #fff;
+  font-weight: 600;
+}
+
+.nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 14px 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.user-card:hover { background: rgba(255,255,255,0.06); }
+
+.user-avatar {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--teal), #00bfa5);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+
+.user-name { font-size: 12px; font-weight: 600; color: #fff; }
+.user-role { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+
+/* ══ TOPBAR ═══════════════════════════════════════════════════ */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 14px;
+  z-index: 90;
+  box-shadow: var(--shadow-sm);
+}
+
+.topbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+
+.topbar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  width: 220px;
+  transition: all 0.2s;
+}
+.topbar-search:focus-within { border-color: var(--teal); background: #fff; }
+.topbar-search input {
+  border: none; background: transparent; outline: none;
+  font-size: 13px; font-family: var(--font); color: var(--text);
+  width: 100%;
+}
+.topbar-search input::placeholder { color: var(--light-muted); }
+
+.topbar-btn {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.18s;
+  position: relative;
+}
+.topbar-btn:hover { border-color: var(--teal); background: var(--teal-light); }
+
+.notif-dot {
+  position: absolute;
+  top: 5px; right: 5px;
+  width: 7px; height: 7px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+}
+
+/* ══ MAIN CONTENT ═════════════════════════════════════════════ */
+.main {
+  margin-left: var(--sidebar-w);
+  margin-top: var(--topbar-h);
+  padding: 24px;
+  min-height: calc(100vh - var(--topbar-h));
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* ══ SECTION HEADER ═══════════════════════════════════════════ */
+.section-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section-hd h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.section-hd p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.18s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary { background: var(--teal); color: #fff; box-shadow: 0 2px 8px rgba(13,110,114,0.25); }
+.btn-primary:hover { background: var(--teal-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(13,110,114,0.35); }
+.btn-outline { background: transparent; color: var(--teal); border: 1.5px solid var(--teal); }
+.btn-outline:hover { background: var(--teal-light); }
+
+/* ══ KPI CARDS ════════════════════════════════════════════════ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(13,110,114,0.12); }
+
+.kpi-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+.kpi-val {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.kpi-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.kpi-change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.kpi-change.up   { color: var(--green); }
+.kpi-change.down { color: var(--red); }
+
+.kpi-trend {
+  position: absolute;
+  bottom: 0; right: 0;
+  opacity: 0.07;
+  font-size: 60px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ══ CARDS ═════════════════════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.card-hd {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-hd h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.card-hd span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.card-body { padding: 20px; }
+
+/* ══ GRID LAYOUTS ══════════════════════════════════════════════ */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.grid-6-4 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+/* ══ TABLE ══════════════════════════════════════════════════════ */
+.tbl-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface2); }
+
+.td-name { font-weight: 600; }
+.td-id   { color: var(--muted); font-size: 12px; font-family: monospace; }
+
+/* ══ BADGE / STATUS ════════════════════════════════════════════ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-green  { background: var(--green-bg);  color: #065f46; }
+.badge-amber  { background: var(--amber-bg);  color: #92400e; }
+.badge-red    { background: var(--red-bg);    color: #991b1b; }
+.badge-blue   { background: var(--blue-bg);   color: #1e40af; }
+.badge-teal   { background: var(--teal-light);color: var(--teal-dark); }
+
+/* ══ AVATAR ════════════════════════════════════════════════════ */
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+
+.td-user { display: flex; align-items: center; gap: 9px; }
+
+/* ══ NOTIFICATION ITEM ═════════════════════════════════════════ */
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-dot-icon {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.notif-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+.notif-time { font-size: 11px; color: var(--light-muted); margin-top: 2px; }
+
+/* ══ PROGRESS BAR ══════════════════════════════════════════════ */
+.prog-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.prog-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--teal), var(--mint));
+}
+
+/* ══ DEPT ROW ══════════════════════════════════════════════════ */
+.dept-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dept-row:last-child { border-bottom: none; }
+.dept-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.dept-count { font-size: 12px; color: var(--muted); }
+
+/* ══ MINI STAT ══════════════════════════════════════════════════ */
+.mini-stats { display: flex; gap: 12px; margin-bottom: 20px; }
+.mini-stat {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.mini-stat-val { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+.mini-stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ══ SCHEDULE ═══════════════════════════════════════════════════ */
+.sched-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.sched-item:last-child { border-bottom: none; }
+.sched-time { font-size: 12px; font-weight: 700; color: var(--teal); min-width: 52px; }
+.sched-info { flex: 1; }
+.sched-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.sched-dept { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+/* ══ TABS ════════════════════════════════════════════════════════ */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+.tab {
+  flex: 1;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.18s;
+  border: none;
+  background: none;
+  font-family: var(--font);
+}
+.tab.active { background: var(--surface); color: var(--teal); box-shadow: var(--shadow-sm); }
+
+/* ══ BED MAP ════════════════════════════════════════════════════ */
+.bed-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.bed {
+  width: 48px; height: 48px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+  border: 1.5px solid transparent;
+}
+.bed:hover { transform: scale(1.08); }
+.bed span { font-size: 9px; font-weight: 500; margin-top: 2px; }
+.bed.available  { background: var(--green-bg);  color: #065f46; border-color: #bbf7d0; }
+.bed.occupied   { background: var(--red-bg);    color: #991b1b; border-color: #fecaca; }
+.bed.reserved   { background: var(--amber-bg);  color: #92400e; border-color: #fde68a; }
+.bed.maintenance{ background: var(--border);    color: var(--muted); border-color: #cbd5e1; }
+
+/* ══ INVOICE LIST ════════════════════════════════════════════════ */
+.inv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.inv-row:last-child { border-bottom: none; }
+.inv-ref { font-size: 12px; font-weight: 700; color: var(--teal); font-family: monospace; }
+.inv-svc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.inv-amt { font-size: 14px; font-weight: 800; color: var(--text); }
+
+/* ══ FORM ════════════════════════════════════════════════════════ */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.form-input, .form-select {
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,110,114,0.08); }
+.form-input::placeholder { color: var(--light-muted); }
+
+/* ══ MODAL ════════════════════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+  width: 520px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalIn { from { transform: scale(0.93) translateY(10px); opacity: 0; } }
+.modal-hd {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-hd h3 { font-size: 16px; font-weight: 700; color: var(--text); }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 7px; border: none;
+  background: var(--surface2); color: var(--muted); cursor: pointer;
+  font-size: 14px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.modal-close:hover { background: var(--border); color: var(--text); }
+.modal-body { padding: 20px 22px; }
+.modal-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+
+/* ══ TOAST ════════════════════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--navy);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 999;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* ══ RESPONSIVE ══════════════════════════════════════════════════ */
+@media(max-width:1100px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+@media(max-width:900px)  { .grid-2,.grid-6-4,.grid-3 { grid-template-columns: 1fr; } }
+@media(max-width:700px) {
+  .sidebar { transform: translateX(-100%); }
+  .main, .topbar { margin-left: 0; left: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">🏥</div>
+    <div>
+      <div class="brand-name">Medi<span>Core</span></div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">Main</div>
+  <a class="nav-item active" onclick="showPage('dashboard')">
+    <span class="nav-icon">📊</span> Dashboard
+  </a>
+
+  <div class="sidebar-section">Management</div>
+  <a class="nav-item" onclick="showPage('patients')">
+    <span class="nav-icon">👥</span> Patients
+    <span class="nav-badge">8</span>
+  </a>
+  <a class="nav-item" onclick="showPage('doctors')">
+    <span class="nav-icon">🩺</span> Doctors
+  </a>
+  <a class="nav-item" onclick="showPage('appointments')">
+    <span class="nav-icon">📅</span> Appointments
+  </a>
+  <a class="nav-item" onclick="showPage('beds')">
+    <span class="nav-icon">🏥</span> Bed Management
+  </a>
+
+  <div class="sidebar-section">Clinical</div>
+  <a class="nav-item" onclick="showPage('records')">
+    <span class="nav-icon">📋</span> Medical Records
+  </a>
+  <a class="nav-item" onclick="showPage('billing')">
+    <span class="nav-icon">💳</span> Billing
+  </a>
+
+  <div class="sidebar-section">System</div>
+  <a class="nav-item" onclick="showPage('analytics')">
+    <span class="nav-icon">📈</span> Analytics
+  </a>
+  <a class="nav-item" onclick="showPage('notifications')">
+    <span class="nav-icon">🔔</span> Notifications
+    <span class="nav-badge">3</span>
+  </a>
+  <a class="nav-item" onclick="showPage('settings')">
+    <span class="nav-icon">⚙️</span> Settings
+  </a>
+  <a class="nav-item" onclick="doLogout()" style="color:rgba(255,255,255,0.45)">
+    <span class="nav-icon">🚪</span> Logout
+  </a>
+
+  <div class="sidebar-footer">
+    <div class="user-card" onclick="showPage('profile')" style="cursor:pointer">
+      <div class="user-avatar">AH</div>
+      <div>
+        <div class="user-name">Dr. Admin Hassan</div>
+        <div class="user-role">Administrator</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <div class="topbar-title" id="topbarTitle">Dashboard Overview</div>
+  <div class="topbar-search">
+    <span style="color:var(--light-muted);font-size:14px">🔍</span>
+    <input type="text" placeholder="Search patients, doctors...">
+  </div>
+  <div class="topbar-btn" title="Notifications">
+    🔔
+    <div class="notif-dot"></div>
+  </div>
+  <div class="topbar-btn" title="Dark Mode" onclick="toggleTheme()">🌙</div>
+  <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--teal),#00bfa5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;cursor:pointer;" onclick="showPage('profile')">AH</div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+  <!-- ═══ DASHBOARD PAGE ═══ -->
+  <div id="page-dashboard" class="page active">
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#e6f4f5">👥</div>
+        <div class="kpi-val">1,284</div>
+        <div class="kpi-label">Total Patients</div>
+        <div class="kpi-change up">↑ 12% from last month</div>
+        <div class="kpi-trend">👥</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#eff6ff">📅</div>
+        <div class="kpi-val">248</div>
+        <div class="kpi-label">Appointments Today</div>
+        <div class="kpi-change up">↑ 8% from yesterday</div>
+        <div class="kpi-trend">📅</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#f0fdf4">🏥</div>
+        <div class="kpi-val">87<span style="font-size:16px;font-weight:500;color:var(--muted)">%</span></div>
+        <div class="kpi-label">Bed Occupancy</div>
+        <div class="kpi-change down">↓ 3% from last week</div>
+        <div class="kpi-trend">🏥</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#fffbeb">💳</div>
+        <div class="kpi-val" style="font-size:22px">EGP 128K</div>
+        <div class="kpi-label">Monthly Revenue</div>
+        <div class="kpi-change up">↑ 18% vs last month</div>
+        <div class="kpi-trend">💳</div>
+      </div>
+    </div>
+
+    <div class="grid-6-4">
+      <!-- Appointments Chart -->
+      <div class="card">
+        <div class="card-hd">
+          <h3>📈 Appointments Overview</h3>
+          <span>Last 7 days</span>
+        </div>
+        <div class="card-body">
+          <canvas id="apptChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Department Distribution -->
+      <div class="card">
+        <div class="card-hd">
+          <h3>🏢 Department Distribution</h3>
+          <span>This month</span>
+        </div>
+        <div class="card-body">
+          <canvas id="deptChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Recent Patients -->
+      <div class="card">
+        <div class="card-hd">
+          <h3>👥 Recent Patients</h3>
+          <button class="btn btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('patients')">View All</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>Patient</th><th>ID</th><th>Blood</th><th>Status</th>
+              </tr></thead>
+              <tbody>
+                <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#0d6e72,#00bfa5)">SM</div><div><div class="td-name">Sarah Mitchell</div><div class="td-id">Cardiology</div></div></div></td><td><span class="td-id">P-1042</span></td><td>O+</td><td><span class="badge badge-green">Active</span></td></tr>
+                <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#1565c0,#3b82f6)">RC</div><div><div class="td-name">Robert Chen</div><div class="td-id">Neurology</div></div></div></td><td><span class="td-id">P-1043</span></td><td>B+</td><td><span class="badge badge-green">Active</span></td></tr>
+                <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">AJ</div><div><div class="td-name">Amara Johnson</div><div class="td-id">Orthopedics</div></div></div></td><td><span class="td-id">P-1044</span></td><td>A−</td><td><span class="badge badge-amber">Review</span></td></tr>
+                <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#d97706,#fbbf24)">DP</div><div><div class="td-name">David Park</div><div class="td-id">Pediatrics</div></div></div></td><td><span class="td-id">P-1045</span></td><td>AB+</td><td><span class="badge badge-amber">Review</span></td></tr>
+                <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#dc2626,#f87171)">LT</div><div><div class="td-name">Lisa Thompson</div><div class="td-id">Cardiology</div></div></div></td><td><span class="td-id">P-1046</span></td><td>O−</td><td><span class="badge badge-green">Active</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Appointments -->
+      <div class="card">
+        <div class="card-hd">
+          <h3>📅 Today's Schedule</h3>
+          <span>March 1, 2026</span>
+        </div>
+        <div class="card-body">
+          <div class="sched-item"><div class="sched-time">09:00</div><div class="sched-info"><div class="sched-name">Sarah Mitchell</div><div class="sched-dept">Dr. James Wilson · Cardiology</div></div><span class="badge badge-green">Done</span></div>
+          <div class="sched-item"><div class="sched-time">10:30</div><div class="sched-info"><div class="sched-name">Robert Chen</div><div class="sched-dept">Dr. Emily Clarke · Neurology</div></div><span class="badge badge-blue">Scheduled</span></div>
+          <div class="sched-item"><div class="sched-time">11:00</div><div class="sched-info"><div class="sched-name">Amara Johnson</div><div class="sched-dept">Dr. Marcus Lee · Orthopedics</div></div><span class="badge badge-blue">Scheduled</span></div>
+          <div class="sched-item"><div class="sched-time">01:00</div><div class="sched-info"><div class="sched-name">David Park</div><div class="sched-dept">Dr. Anna Patel · Pediatrics</div></div><span class="badge badge-red">Cancelled</span></div>
+          <div class="sched-item"><div class="sched-time">02:30</div><div class="sched-info"><div class="sched-name">Lisa Thompson</div><div class="sched-dept">Dr. James Wilson · Cardiology</div></div><span class="badge badge-amber">Pending</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications + Bed Summary -->
+    <div class="grid-6-4">
+      <div class="card">
+        <div class="card-hd">
+          <h3>🔔 Recent Notifications</h3>
+          <button class="btn btn-outline" style="font-size:11px;padding:5px 10px">Mark All Read</button>
+        </div>
+        <div class="card-body">
+          <div class="notif-item"><div class="notif-dot-icon" style="background:var(--green)"></div><div><div class="notif-text">Kevin Osei has been <strong>registered</strong> successfully.</div><div class="notif-time">5 min ago</div></div></div>
+          <div class="notif-item"><div class="notif-dot-icon" style="background:var(--amber)"></div><div><div class="notif-text">Dr. Wilson has <strong>3 appointments</strong> in the next hour.</div><div class="notif-time">15 min ago</div></div></div>
+          <div class="notif-item"><div class="notif-dot-icon" style="background:var(--red)"></div><div><div class="notif-text">Invoice <strong>INV-2238</strong> for Amara Johnson is overdue.</div><div class="notif-time">1 hour ago</div></div></div>
+          <div class="notif-item"><div class="notif-dot-icon" style="background:var(--blue)"></div><div><div class="notif-text">Lab results for patient <strong>P-1043</strong> are ready.</div><div class="notif-time">2 hours ago</div></div></div>
+          <div class="notif-item"><div class="notif-dot-icon" style="background:var(--blue)"></div><div><div class="notif-text">System maintenance scheduled for <strong>March 5 at 2:00 AM</strong>.</div><div class="notif-time">Yesterday</div></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><h3>🏥 Bed Summary</h3><button class="btn btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('beds')">Full Map</button></div>
+        <div class="card-body">
+          <div class="dept-row"><span class="dept-name">Cardiology</span><div style="display:flex;align-items:center;gap:8px"><span class="dept-count">18/20</span><span class="badge badge-amber">90%</span></div></div>
+          <div style="margin-bottom:12px"><div class="prog-bar"><div class="prog-fill" style="width:90%;background:linear-gradient(90deg,#d97706,#fbbf24)"></div></div></div>
+          <div class="dept-row"><span class="dept-name">Neurology</span><div style="display:flex;align-items:center;gap:8px"><span class="dept-count">12/16</span><span class="badge badge-green">75%</span></div></div>
+          <div style="margin-bottom:12px"><div class="prog-bar"><div class="prog-fill" style="width:75%"></div></div></div>
+          <div class="dept-row"><span class="dept-name">Orthopedics</span><div style="display:flex;align-items:center;gap:8px"><span class="dept-count">8/10</span><span class="badge badge-red">80%</span></div></div>
+          <div style="margin-bottom:12px"><div class="prog-bar"><div class="prog-fill" style="width:80%;background:linear-gradient(90deg,var(--red),#f87171)"></div></div></div>
+          <div class="dept-row"><span class="dept-name">Pediatrics</span><div style="display:flex;align-items:center;gap:8px"><span class="dept-count">6/12</span><span class="badge badge-teal">50%</span></div></div>
+          <div><div class="prog-bar"><div class="prog-fill" style="width:50%"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PATIENTS PAGE ═══ -->
+  <div id="page-patients" class="page">
+    <div class="section-hd">
+      <div>
+        <h2>Patient Management</h2>
+        <p>Registered patients and their records</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('addPatient')">＋ Add Patient</button>
+    </div>
+    <div class="mini-stats">
+      <div class="mini-stat"><div class="mini-stat-val">1,284</div><div class="mini-stat-lbl">Total Patients</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--green)">1,156</div><div class="mini-stat-lbl">Active</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--amber)">128</div><div class="mini-stat-lbl">Under Review</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--muted)">47</div><div class="mini-stat-lbl">Discharged</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd">
+        <h3>All Patients</h3>
+        <input class="form-input" id="patientSearch" style="width:200px;padding:6px 10px;font-size:12px" placeholder="🔍  Search..." onkeyup="searchPatients(this.value)">
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Patient</th><th>ID</th><th>Date of Birth</th><th>Phone</th><th>Blood Type</th><th>Doctor</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#0d6e72,#00bfa5)">SM</div><div><div class="td-name">Sarah Mitchell</div><div class="td-id">sarah@email.com</div></div></div></td><td><span class="td-id">P-1042</span></td><td>May 12, 1990</td><td>+20 100-001-0001</td><td><span class="badge badge-teal">O+</span></td><td>Dr. Wilson</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px">View</button></td></tr>
+              <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#1565c0,#3b82f6)">RC</div><div><div class="td-name">Robert Chen</div><div class="td-id">robert@email.com</div></div></div></td><td><span class="td-id">P-1043</span></td><td>Nov 30, 1985</td><td>+20 100-001-0002</td><td><span class="badge badge-blue">B+</span></td><td>Dr. Clarke</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px">View</button></td></tr>
+              <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">AJ</div><div><div class="td-name">Amara Johnson</div><div class="td-id">amara@email.com</div></div></div></td><td><span class="td-id">P-1044</span></td><td>Mar 22, 1978</td><td>+20 100-001-0003</td><td><span class="badge badge-red">A−</span></td><td>Dr. Lee</td><td><span class="badge badge-amber">Review</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px">View</button></td></tr>
+              <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#d97706,#fbbf24)">DP</div><div><div class="td-name">David Park</div><div class="td-id">david@email.com</div></div></div></td><td><span class="td-id">P-1045</span></td><td>Jul 19, 2001</td><td>+20 100-001-0004</td><td><span class="badge badge-teal">AB+</span></td><td>Dr. Patel</td><td><span class="badge badge-amber">Review</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px">View</button></td></tr>
+              <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#dc2626,#f87171)">LT</div><div><div class="td-name">Lisa Thompson</div><div class="td-id">lisa@email.com</div></div></div></td><td><span class="td-id">P-1046</span></td><td>Sep 8, 1995</td><td>+20 100-001-0005</td><td><span class="badge badge-red">O−</span></td><td>Dr. Wilson</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px">View</button></td></tr>
+              <tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#059669,#34d399)">KO</div><div><div class="td-name">Kevin Osei</div><div class="td-id">kevin@email.com</div></div></div></td><td><span class="td-id">P-1047</span></td><td>Dec 1, 1988</td><td>+20 100-001-0006</td><td><span class="badge badge-blue">B−</span></td><td>Dr. Clarke</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DOCTORS PAGE ═══ -->
+  <div id="page-doctors" class="page">
+    <div class="section-hd">
+      <div><h2>Doctor Directory</h2><p>Medical staff and their schedules</p></div>
+      <button class="btn btn-primary">＋ Add Doctor</button>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+        <div class="avatar" style="width:52px;height:52px;font-size:18px;background:linear-gradient(135deg,#0d2e5e,#1565c0)">JW</div>
+        <div><div style="font-weight:700;font-size:14px">Dr. James Wilson</div><div style="font-size:12px;color:var(--teal);font-weight:600">Cardiologist</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Mon–Fri · 08:00–16:00</div></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:var(--muted)">Today:</span><span style="font-weight:700;color:var(--text)">4 appts</span></div>
+        <span class="badge badge-green">● Available</span>
+        <div style="display:flex;gap:6px;width:100%"><button class="btn btn-outline" style="flex:1;font-size:11px;padding:6px">Profile</button><button class="btn btn-primary" style="flex:1;font-size:11px;padding:6px">Schedule</button></div>
+      </div>
+      <div class="card" style="padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+        <div class="avatar" style="width:52px;height:52px;font-size:18px;background:linear-gradient(135deg,#1565c0,#3b82f6)">EC</div>
+        <div><div style="font-weight:700;font-size:14px">Dr. Emily Clarke</div><div style="font-size:12px;color:var(--teal);font-weight:600">Neurologist</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Tue–Sat · 09:00–17:00</div></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:var(--muted)">Today:</span><span style="font-weight:700;color:var(--text)">3 appts</span></div>
+        <span class="badge badge-green">● Available</span>
+        <div style="display:flex;gap:6px;width:100%"><button class="btn btn-outline" style="flex:1;font-size:11px;padding:6px">Profile</button><button class="btn btn-primary" style="flex:1;font-size:11px;padding:6px">Schedule</button></div>
+      </div>
+      <div class="card" style="padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+        <div class="avatar" style="width:52px;height:52px;font-size:18px;background:linear-gradient(135deg,#7c3aed,#a78bfa)">ML</div>
+        <div><div style="font-weight:700;font-size:14px">Dr. Marcus Lee</div><div style="font-size:12px;color:var(--teal);font-weight:600">Orthopedic</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Mon–Thu · 07:00–15:00</div></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:var(--muted)">Today:</span><span style="font-weight:700;color:var(--text)">0 appts</span></div>
+        <span class="badge badge-red">● Busy</span>
+        <div style="display:flex;gap:6px;width:100%"><button class="btn btn-outline" style="flex:1;font-size:11px;padding:6px">Profile</button><button class="btn btn-primary" style="flex:1;font-size:11px;padding:6px">Schedule</button></div>
+      </div>
+      <div class="card" style="padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+        <div class="avatar" style="width:52px;height:52px;font-size:18px;background:linear-gradient(135deg,#d97706,#fbbf24)">AP</div>
+        <div><div style="font-weight:700;font-size:14px">Dr. Anna Patel</div><div style="font-size:12px;color:var(--teal);font-weight:600">Pediatrician</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Mon–Fri · 10:00–18:00</div></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:var(--muted)">Today:</span><span style="font-weight:700;color:var(--text)">5 appts</span></div>
+        <span class="badge badge-green">● Available</span>
+        <div style="display:flex;gap:6px;width:100%"><button class="btn btn-outline" style="flex:1;font-size:11px;padding:6px">Profile</button><button class="btn btn-primary" style="flex:1;font-size:11px;padding:6px">Schedule</button></div>
+      </div>
+      <div class="card" style="padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+        <div class="avatar" style="width:52px;height:52px;font-size:18px;background:linear-gradient(135deg,#0891b2,#22d3ee)">SR</div>
+        <div><div style="font-weight:700;font-size:14px">Dr. Sofia Reyes</div><div style="font-size:12px;color:var(--teal);font-weight:600">Dermatologist</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Wed–Sun · 11:00–19:00</div></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:var(--muted)">Today:</span><span style="font-weight:700;color:var(--text)">2 appts</span></div>
+        <span class="badge badge-amber">● On Break</span>
+        <div style="display:flex;gap:6px;width:100%"><button class="btn btn-outline" style="flex:1;font-size:11px;padding:6px">Profile</button><button class="btn btn-primary" style="flex:1;font-size:11px;padding:6px">Schedule</button></div>
+      </div>
+      <div class="card" style="padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+        <div class="avatar" style="width:52px;height:52px;font-size:18px;background:linear-gradient(135deg,#9d174d,#f472b6)">TN</div>
+        <div><div style="font-weight:700;font-size:14px">Dr. Thomas Nguyen</div><div style="font-size:12px;color:var(--teal);font-weight:600">Psychiatrist</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Mon–Fri · 09:00–17:00</div></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:var(--muted)">Today:</span><span style="font-weight:700;color:var(--text)">3 appts</span></div>
+        <span class="badge badge-green">● Available</span>
+        <div style="display:flex;gap:6px;width:100%"><button class="btn btn-outline" style="flex:1;font-size:11px;padding:6px">Profile</button><button class="btn btn-primary" style="flex:1;font-size:11px;padding:6px">Schedule</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ APPOINTMENTS PAGE ═══ -->
+  <div id="page-appointments" class="page">
+    <div class="section-hd">
+      <div><h2>Appointments</h2><p>All scheduled appointments</p></div>
+      <button class="btn btn-primary" onclick="openModal('addAppt')">＋ New Appointment</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="setTab(this)">All</button>
+      <button class="tab" onclick="setTab(this)">Scheduled</button>
+      <button class="tab" onclick="setTab(this)">Completed</button>
+      <button class="tab" onclick="setTab(this)">Cancelled</button>
+      <button class="tab" onclick="setTab(this)">Pending</button>
+    </div>
+    <div class="card">
+      <div class="card-body" style="padding:0">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Ref</th><th>Patient</th><th>Doctor</th><th>Department</th><th>Date</th><th>Time</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><span class="td-id">A-101</span></td><td>Sarah Mitchell</td><td>Dr. James Wilson</td><td>Cardiology</td><td>Mar 1</td><td>09:00 AM</td><td>Consultation</td><td><span class="badge badge-green">Completed</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+              <tr><td><span class="td-id">A-102</span></td><td>Robert Chen</td><td>Dr. Emily Clarke</td><td>Neurology</td><td>Mar 1</td><td>10:30 AM</td><td>Follow-up</td><td><span class="badge badge-blue">Scheduled</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+              <tr><td><span class="td-id">A-103</span></td><td>Amara Johnson</td><td>Dr. Marcus Lee</td><td>Orthopedics</td><td>Mar 1</td><td>11:00 AM</td><td>Procedure</td><td><span class="badge badge-blue">Scheduled</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+              <tr><td><span class="td-id">A-104</span></td><td>David Park</td><td>Dr. Anna Patel</td><td>Pediatrics</td><td>Mar 1</td><td>01:00 PM</td><td>Check-up</td><td><span class="badge badge-red">Cancelled</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+              <tr><td><span class="td-id">A-105</span></td><td>Lisa Thompson</td><td>Dr. James Wilson</td><td>Cardiology</td><td>Mar 1</td><td>02:30 PM</td><td>Consultation</td><td><span class="badge badge-amber">Pending</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+              <tr><td><span class="td-id">A-106</span></td><td>Kevin Osei</td><td>Dr. Emily Clarke</td><td>Neurology</td><td>Mar 1</td><td>04:00 PM</td><td>Follow-up</td><td><span class="badge badge-blue">Scheduled</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BED MANAGEMENT ═══ -->
+  <div id="page-beds" class="page">
+    <div class="section-hd">
+      <div><h2>Bed Management</h2><p>Real-time ward occupancy map</p></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline">📋 Export</button>
+        <button class="btn btn-primary" onclick="showToast('Bed admitted successfully!','✅')">+ Admit Patient</button>
+      </div>
+    </div>
+    <div class="mini-stats">
+      <div class="mini-stat"><div class="mini-stat-val">120</div><div class="mini-stat-lbl">Total Beds</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--red)">87</div><div class="mini-stat-lbl">Occupied</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--green)">24</div><div class="mini-stat-lbl">Available</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--amber)">6</div><div class="mini-stat-lbl">Reserved</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--muted)">3</div><div class="mini-stat-lbl">Maintenance</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-hd"><h3>🫀 Cardiology Ward (A)</h3><span class="badge badge-amber">18/20 occupied</span></div>
+        <div class="card-body">
+          <div class="bed-grid" id="cardio-beds"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h3>🧠 Neurology Ward (B)</h3><span class="badge badge-green">12/16 occupied</span></div>
+        <div class="card-body">
+          <div class="bed-grid" id="neuro-beds"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h3>🦴 Orthopedics Ward (C)</h3><span class="badge badge-amber">8/10 occupied</span></div>
+        <div class="card-body">
+          <div class="bed-grid" id="ortho-beds"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h3>👶 Pediatrics Ward (D)</h3><span class="badge badge-teal">6/12 occupied</span></div>
+        <div class="card-body">
+          <div class="bed-grid" id="peds-beds"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="padding:14px 20px">
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)"><div style="width:12px;height:12px;border-radius:3px;background:#dcfce7;border:1.5px solid #bbf7d0"></div>Available</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)"><div style="width:12px;height:12px;border-radius:3px;background:#fef2f2;border:1.5px solid #fecaca"></div>Occupied</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)"><div style="width:12px;height:12px;border-radius:3px;background:#fffbeb;border:1.5px solid #fde68a"></div>Reserved</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)"><div style="width:12px;height:12px;border-radius:3px;background:#e2e8f0;border:1.5px solid #cbd5e1"></div>Maintenance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BILLING PAGE ═══ -->
+  <div id="page-billing" class="page">
+    <div class="section-hd">
+      <div><h2>Billing & Invoices</h2><p>Invoice management and payment tracking</p></div>
+      <button class="btn btn-primary" onclick="openModal('addInvoice')">＋ New Invoice</button>
+    </div>
+    <div class="mini-stats">
+      <div class="mini-stat"><div class="mini-stat-val">EGP 128K</div><div class="mini-stat-lbl">Total Invoiced</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--green)">EGP 98K</div><div class="mini-stat-lbl">Collected</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--amber)">EGP 22K</div><div class="mini-stat-lbl">Pending</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" style="color:var(--red)">EGP 8K</div><div class="mini-stat-lbl">Overdue</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><h3>Recent Invoices</h3><input class="form-input" style="width:180px;padding:6px 10px;font-size:12px" placeholder="🔍 Search INV-..."></div>
+      <div class="card-body" style="padding:0">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Invoice</th><th>Patient</th><th>Service</th><th>Date</th><th>Amount</th><th>Insurance</th><th>Net</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><span class="td-id">INV-2240</span></td><td>Sarah Mitchell</td><td>Cardiology Consultation</td><td>Mar 1</td><td>EGP 350</td><td>EGP 30</td><td style="font-weight:700">EGP 320</td><td><span class="badge badge-green">Paid</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">Receipt</button></td></tr>
+              <tr><td><span class="td-id">INV-2239</span></td><td>Robert Chen</td><td>Neurology Follow-up</td><td>Feb 28</td><td>EGP 200</td><td>EGP 20</td><td style="font-weight:700">EGP 180</td><td><span class="badge badge-amber">Pending</span></td><td><button class="btn btn-primary" style="font-size:11px;padding:4px 8px" onclick="showToast('Payment recorded!','✅')">Pay</button></td></tr>
+              <tr><td><span class="td-id">INV-2238</span></td><td>Amara Johnson</td><td>Orthopedic Surgery</td><td>Feb 20</td><td>EGP 4,500</td><td>EGP 300</td><td style="font-weight:700">EGP 4,200</td><td><span class="badge badge-red">Overdue</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">Remind</button></td></tr>
+              <tr><td><span class="td-id">INV-2237</span></td><td>David Park</td><td>Pediatrics Check-up</td><td>Mar 1</td><td>EGP 95</td><td>EGP 0</td><td style="font-weight:700">EGP 95</td><td><span class="badge badge-blue">Issued</span></td><td><button class="btn btn-primary" style="font-size:11px;padding:4px 8px" onclick="showToast('Payment recorded!','✅')">Pay</button></td></tr>
+              <tr><td><span class="td-id">INV-2236</span></td><td>Lisa Thompson</td><td>ECG + Echocardiogram</td><td>Feb 15</td><td>EGP 950</td><td>EGP 60</td><td style="font-weight:700">EGP 890</td><td><span class="badge badge-green">Paid</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">Receipt</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ANALYTICS PAGE ═══ -->
+  <div id="page-analytics" class="page">
+    <div class="section-hd">
+      <div><h2>Analytics & Reports</h2><p>Hospital performance insights</p></div>
+      <button class="btn btn-outline">📥 Export Report</button>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon" style="background:#e6f4f5">👥</div><div class="kpi-val">247</div><div class="kpi-label">New Patients (Month)</div><div class="kpi-change up">↑ 12%</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#eff6ff">📅</div><div class="kpi-val">1,840</div><div class="kpi-label">Monthly Appointments</div><div class="kpi-change up">↑ 8%</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#f0fdf4">💰</div><div class="kpi-val" style="font-size:20px">EGP 128K</div><div class="kpi-label">Revenue Collected</div><div class="kpi-change up">↑ 18%</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#fffbeb">❌</div><div class="kpi-val">4.2<span style="font-size:16px;font-weight:500;color:var(--muted)">%</span></div><div class="kpi-label">Cancellation Rate</div><div class="kpi-change down">↓ 1.1%</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-hd"><h3>📈 Monthly Trends</h3><span>Jan–Jun 2026</span></div><div class="card-body"><canvas id="trendChart" height="220"></canvas></div></div>
+      <div class="card"><div class="card-hd"><h3>🏢 Dept Performance</h3><span>Completion rate</span></div><div class="card-body"><canvas id="deptPerfChart" height="220"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ RECORDS PAGE (stub) ═══ -->
+  <div id="page-records" class="page">
+    <div class="section-hd"><div><h2>Medical Records</h2><p>Patient health history</p></div></div>
+    <div class="card" style="padding:60px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:12px">📋</div><div style="font-size:15px;font-weight:600">Select a patient to view their medical records</div><div style="font-size:13px;margin-top:6px">Navigate to Patients → View to access records</div></div>
+  </div>
+
+  <!-- ═══ NOTIFICATIONS PAGE (stub) ═══ -->
+  <div id="page-notifications" class="page">
+    <div class="section-hd"><div><h2>Notifications</h2><p>System alerts and messages</p></div><button class="btn btn-outline">Mark All Read</button></div>
+    <div class="card">
+      <div class="card-body">
+        <div class="notif-item"><div class="notif-dot-icon" style="background:var(--green)"></div><div><div class="notif-text"><strong>Kevin Osei</strong> has been registered successfully.</div><div class="notif-time">5 min ago</div></div></div>
+        <div class="notif-item"><div class="notif-dot-icon" style="background:var(--amber)"></div><div><div class="notif-text">Dr. Wilson has <strong>3 appointments</strong> in the next hour.</div><div class="notif-time">15 min ago</div></div></div>
+        <div class="notif-item"><div class="notif-dot-icon" style="background:var(--red)"></div><div><div class="notif-text">Invoice <strong>INV-2238</strong> for Amara Johnson is overdue.</div><div class="notif-time">1 hour ago</div></div></div>
+        <div class="notif-item"><div class="notif-dot-icon" style="background:var(--blue)"></div><div><div class="notif-text">Lab results for patient <strong>P-1043</strong> are ready.</div><div class="notif-time">2 hours ago</div></div></div>
+        <div class="notif-item"><div class="notif-dot-icon" style="background:var(--blue)"></div><div><div class="notif-text">System maintenance scheduled for <strong>March 5 at 2:00 AM</strong>.</div><div class="notif-time">Yesterday</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SETTINGS PAGE (stub) ═══ -->
+  <div id="page-settings" class="page">
+    <div class="section-hd"><div><h2>System Settings</h2><p>Hospital configuration</p></div></div>
+    <div class="card"><div class="card-body" style="padding:60px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:12px">⚙️</div><div style="font-size:15px;font-weight:600">Settings panel coming in next update</div></div></div>
+  </div>
+
+  <!-- ═══ PROFILE PAGE ═══ -->
+  <div id="page-profile" class="page">
+    <div class="section-hd"><div><h2>My Profile</h2><p>Administrative account details</p></div></div>
+    <div class="card"><div class="card-body">
+      <div style="display:flex;align-items:center;gap:20px;margin-bottom:24px">
+        <div class="avatar" style="width:80px;height:80px;font-size:24px;background:linear-gradient(135deg,var(--teal),#00bfa5);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800">AH</div>
+        <div>
+          <h3 id="prof-name-display" style="font-size:18px;margin-bottom:4px">Dr. Admin Hassan</h3>
+          <p style="color:var(--muted);font-size:14px">System Administrator · MediCore HMS</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="prof-name" readonly></div>
+        <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="prof-email" readonly></div>
+        <div class="form-group"><label class="form-label">Access Level</label><input class="form-input" value="Super Admin" readonly></div>
+        <div class="form-group"><label class="form-label">Account Status</label><input class="form-input" value="Active" readonly></div>
+      </div>
+    </div></div>
+  </div>
+
+</main>
+
+<!-- ══ MODAL: Add Patient ══ -->
+<div class="modal-overlay" id="modal-addPatient">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3>Add New Patient</h3>
+      <button class="modal-close" onclick="closeModal('addPatient')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="ap-name" placeholder="Patient full name"></div>
+        <div class="form-group"><label class="form-label">Email *</label><input class="form-input" id="ap-email" type="email" placeholder="patient@email.com"></div>
+        <div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="ap-password" type="password" placeholder="Min 6 characters"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="ap-phone" placeholder="+20 1XX-XXX-XXXX"></div>
+        <div class="form-group"><label class="form-label">Date of Birth *</label><input class="form-input" id="ap-dob" type="date"></div>
+        <div class="form-group"><label class="form-label">Blood Type *</label><select class="form-select" id="ap-blood"><option value="">Select...</option><option>A+</option><option>A−</option><option>B+</option><option>B−</option><option>O+</option><option>O−</option><option>AB+</option><option>AB−</option></select></div>
+        <div class="form-group full"><label class="form-label">Known Allergies</label><input class="form-input" id="ap-allergies" placeholder="e.g. Penicillin, Aspirin..."></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addPatient')">Cancel</button>
+      <button class="btn btn-primary" id="ap-submit-btn" onclick="doAddPatient()">Register Patient</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Add Appointment ══ -->
+<div class="modal-overlay" id="modal-addAppt">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3>New Appointment</h3>
+      <button class="modal-close" onclick="closeModal('addAppt')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Patient *</label><select class="form-select" id="aa-patient"><option value="">Loading patients...</option></select></div>
+        <div class="form-group"><label class="form-label">Doctor *</label><select class="form-select" id="aa-doctor"><option value="">Loading doctors...</option></select></div>
+        <div class="form-group"><label class="form-label">Date *</label><input class="form-input" id="aa-date" type="date"></div>
+        <div class="form-group"><label class="form-label">Time *</label><input class="form-input" id="aa-time" type="time"></div>
+        <div class="form-group"><label class="form-label">Type *</label><select class="form-select" id="aa-type"><option value="consultation">Consultation</option><option value="follow_up">Follow-up</option><option value="procedure">Procedure</option><option value="check_up">Check-up</option></select></div>
+        <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="aa-notes" placeholder="Optional notes..."></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addAppt')">Cancel</button>
+      <button class="btn btn-primary" id="aa-submit-btn" onclick="doAddAppointment()">Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Add Invoice ══ -->
+<div class="modal-overlay" id="modal-addInvoice">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3>Create New Invoice</h3>
+      <button class="modal-close" onclick="closeModal('addInvoice')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Patient *</label><select class="form-select" id="ai-patient"><option value="">Loading patients...</option></select></div>
+        <div class="form-group full"><label class="form-label">Service Name *</label><input class="form-input" id="ai-service" placeholder="e.g. Cardiology Consultation"></div>
+        <div class="form-group"><label class="form-label">Amount (EGP) *</label><input class="form-input" id="ai-amount" type="number" placeholder="0.00"></div>
+        <div class="form-group"><label class="form-label">Insurance Coverage</label><input class="form-input" id="ai-insurance" type="number" value="0"></div>
+        <div class="form-group full"><label class="form-label">Due Date</label><input class="form-input" id="ai-due" type="date"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addInvoice')">Cancel</button>
+      <button class="btn btn-primary" id="ai-submit-btn" onclick="doAddInvoice()">Create Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+var API_BASE = 'http://localhost/MediCore/';
+
+// ── Auth Guard ──────────────────────────────────────────────
+var currentUser = null;
+(function authGuard(){
+  var stored = localStorage.getItem('medicore_user');
+  if(!stored){ window.location.href = 'medicore-login.html'; return; }
+  currentUser = JSON.parse(stored);
+  if(currentUser.role !== 'admin'){ window.location.href = 'medicore-login.html'; return; }
+  // Populate user info in sidebar
+  var initials = currentUser.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  var avatarEl = document.querySelector('.user-avatar');
+  var nameEl = document.querySelector('.user-name');
+  if(avatarEl) avatarEl.textContent = initials;
+  if(nameEl) nameEl.textContent = currentUser.name;
+  // Populate profile
+  var profName = document.getElementById('prof-name');
+  var profNameDisp = document.getElementById('prof-name-display');
+  var profEmail = document.getElementById('prof-email');
+  if(profName) profName.value = currentUser.name;
+  if(profNameDisp) profNameDisp.textContent = currentUser.name;
+  if(profEmail) profEmail.value = currentUser.email;
+  // Topbar avatar
+  var topAvatar = document.querySelector('.topbar').querySelector('[style*="border-radius:50%"]');
+  if(topAvatar) topAvatar.textContent = initials;
+})();
+
+function doLogout(){
+  fetch(API_BASE + 'logout.php').then(function(){
+    localStorage.removeItem('medicore_user');
+    window.location.href = 'medicore-login.html';
+  }).catch(function(){
+    localStorage.removeItem('medicore_user');
+    window.location.href = 'medicore-login.html';
+  });
+}
+
+// ── Navigation ──────────────────────────────────────────────
+const PAGE_TITLES = {
+  dashboard:'Dashboard Overview', patients:'Patient Management',
+  doctors:'Doctor Directory', appointments:'Appointment Management',
+  beds:'Bed Management', records:'Medical Records',
+  billing:'Billing & Invoices', analytics:'Analytics & Reports',
+  notifications:'Notifications', settings:'System Settings', profile:'My Profile'
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(n => { if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active'); });
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[id] || id;
+  if (id === 'beds') renderBeds();
+  if (id === 'analytics') setTimeout(renderAnalyticsCharts, 100);
+}
+
+// ── Modal ───────────────────────────────────────────────────
+function openModal(id)  { document.getElementById('modal-' + id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+function submitModal(id, msg) { closeModal(id); showToast(msg, '✅'); }
+
+// ── Toast ───────────────────────────────────────────────────
+var _toastTimer;
+function showToast(msg, icon) {
+  var t = document.getElementById('toast');
+  t.innerHTML = (icon||'ℹ️') + '  ' + msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
+}
+
+// ── Theme Toggle ─────────────────────────────────────────────
+var darkMode = false;
+function toggleTheme() {
+  darkMode = !darkMode;
+  document.documentElement.style.setProperty('--bg',      darkMode ? '#0f172a' : '#f0f4f8');
+  document.documentElement.style.setProperty('--surface', darkMode ? '#1e293b' : '#ffffff');
+  document.documentElement.style.setProperty('--surface2',darkMode ? '#0f172a' : '#f8fafc');
+  document.documentElement.style.setProperty('--border',  darkMode ? '#334155' : '#e2e8f0');
+  document.documentElement.style.setProperty('--text',    darkMode ? '#f1f5f9' : '#1e293b');
+  document.documentElement.style.setProperty('--muted',   darkMode ? '#94a3b8' : '#64748b');
+  showToast(darkMode ? 'Dark mode on' : 'Light mode on', darkMode ? '🌙' : '☀️');
+}
+
+// ── Bed Map (fallback) ──────────────────────────────────────
+function makeBeds(containerId, total, occupied, reserved, maintenance) {
+  var el = document.getElementById(containerId); if (!el) return; el.innerHTML = '';
+  for (var i = 1; i <= total; i++) {
+    var status = 'available';
+    if (i <= occupied) status = 'occupied';
+    else if (i <= occupied + reserved) status = 'reserved';
+    else if (i <= occupied + reserved + maintenance) status = 'maintenance';
+    var b = document.createElement('div'); b.className = 'bed ' + status;
+    b.innerHTML = '🛏<br><span>' + (i < 10 ? '0'+i : i) + '</span>';
+    b.title = 'Bed ' + i + ' — ' + status.charAt(0).toUpperCase() + status.slice(1);
+    b.onclick = (function(s, n) { return function() { showToast('Bed ' + n + ' — ' + s, s==='available'?'✅':'🔴'); }; })(status, i);
+    el.appendChild(b);
+  }
+}
+function renderBeds() { makeBeds('cardio-beds',20,18,1,0); makeBeds('neuro-beds',16,12,2,1); makeBeds('ortho-beds',10,8,0,1); makeBeds('peds-beds',12,6,1,0); }
+
+// ── API base helpers ────────────────────────────────────────
+function apiGet(endpoint){ return fetch(API_BASE+endpoint,{credentials:'include'}).then(function(r){return r.json();}); }
+function apiPost(endpoint,body){ return fetch(API_BASE+endpoint,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}); }
+
+
+// ── Charts ──────────────────────────────────────────────────
+function renderDashboardCharts() {
+  var ctx1 = document.getElementById('apptChart');
+  if (!ctx1) return;
+  new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets: [{
+        label: 'Appointments',
+        data: [42, 58, 35, 61, 48, 29, 18],
+        backgroundColor: '#0d6e72',
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94a3b8' } },
+        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 }, color: '#94a3b8' } },
+      }
+    }
+  });
+
+  var ctx2 = document.getElementById('deptChart');
+  if (!ctx2) return;
+  new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: ['Cardiology','Neurology','Orthopedics','Pediatrics','Other'],
+      datasets: [{
+        data: [32, 24, 18, 14, 12],
+        backgroundColor: ['#0d6e72','#1565c0','#7c3aed','#d97706','#94a3b8'],
+        borderWidth: 2, borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12, color: '#64748b' } } },
+      cutout: '65%',
+    }
+  });
+}
+
+function renderAnalyticsCharts() {
+  var ctx3 = document.getElementById('trendChart');
+  if (!ctx3 || ctx3._chartInstance) return;
+  var ch3 = new Chart(ctx3, {
+    type: 'line',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets: [
+        { label: 'Appointments', data: [1420,1580,1840,1720,1950,2100], borderColor:'#0d6e72', backgroundColor:'rgba(13,110,114,0.08)', tension:0.4, fill:true, pointRadius:4 },
+        { label: 'Revenue (×100 EGP)', data: [920,1050,1280,1180,1350,1420], borderColor:'#1565c0', backgroundColor:'rgba(21,101,192,0.06)', tension:0.4, fill:true, pointRadius:4 },
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:true, plugins:{ legend:{ position:'bottom', labels:{ font:{size:11}, color:'#64748b' } } }, scales: { x:{grid:{display:false}, ticks:{font:{size:11},color:'#94a3b8'}}, y:{grid:{color:'#f1f5f9'}, ticks:{font:{size:11},color:'#94a3b8'}} } }
+  });
+  ctx3._chartInstance = ch3;
+
+  var ctx4 = document.getElementById('deptPerfChart');
+  if (!ctx4 || ctx4._chartInstance) return;
+  var ch4 = new Chart(ctx4, {
+    type: 'bar',
+    data: {
+      labels: ['Cardiology','Neurology','Orthopedics','Pediatrics','Dermatology'],
+      datasets: [{ label: 'Completion Rate %', data: [92, 88, 79, 95, 84], backgroundColor: ['#0d6e72','#1565c0','#7c3aed','#d97706','#0891b2'], borderRadius:6, borderSkipped:false }]
+    },
+    options: { responsive:true, maintainAspectRatio:true, indexAxis:'y', plugins:{ legend:{display:false} }, scales: { x:{max:100, grid:{color:'#f1f5f9'}, ticks:{font:{size:11},color:'#94a3b8'}}, y:{grid:{display:false}, ticks:{font:{size:11},color:'#64748b'}} } }
+  });
+  ctx4._chartInstance = ch4;
+}
+
+// ── API helpers (PUT/DELETE) ─────────────────────────────────
+function apiPut(endpoint, body){
+  return fetch(API_BASE + endpoint, {method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+function apiDelete(endpoint){
+  return fetch(API_BASE + endpoint, {method:'DELETE',credentials:'include'}).then(function(r){return r.json();});
+}
+
+// ── Add Patient ─────────────────────────────────────────────
+function doAddPatient(){
+  var btn = document.getElementById('ap-submit-btn');
+  var name = document.getElementById('ap-name').value.trim();
+  var email = document.getElementById('ap-email').value.trim();
+  var password = document.getElementById('ap-password').value;
+  var phone = document.getElementById('ap-phone').value.trim();
+  var dob = document.getElementById('ap-dob').value;
+  var blood = document.getElementById('ap-blood').value;
+  var allergies = document.getElementById('ap-allergies').value.trim();
+  if(!name||!email||!password||!dob||!blood){showToast('Please fill all required fields','⚠️');return;}
+  btn.disabled=true; btn.textContent='Saving...';
+  apiPost('patients.php',{name:name,email:email,password:password,phone:phone,date_of_birth:dob,blood_type:blood,allergies:allergies}).then(function(res){
+    btn.disabled=false; btn.textContent='Register Patient';
+    if(res.success){closeModal('addPatient');showToast('Patient registered! Code: '+res.patient_code,'✅');loadPatients();
+      document.getElementById('ap-name').value='';document.getElementById('ap-email').value='';document.getElementById('ap-password').value='';document.getElementById('ap-phone').value='';document.getElementById('ap-dob').value='';document.getElementById('ap-blood').value='';document.getElementById('ap-allergies').value='';
+    } else {showToast(res.error||'Failed to add patient','❌');}
+  }).catch(function(){btn.disabled=false;btn.textContent='Register Patient';showToast('Server error','❌');});
+}
+
+// ── Add Appointment ─────────────────────────────────────────
+function doAddAppointment(){
+  var btn = document.getElementById('aa-submit-btn');
+  var patient_id = document.getElementById('aa-patient').value;
+  var doctor_id = document.getElementById('aa-doctor').value;
+  var date = document.getElementById('aa-date').value;
+  var time = document.getElementById('aa-time').value;
+  var type = document.getElementById('aa-type').value;
+  var notes = document.getElementById('aa-notes').value.trim();
+  if(!patient_id||!doctor_id||!date||!time){showToast('Please fill all required fields','⚠️');return;}
+  btn.disabled=true; btn.textContent='Booking...';
+  apiPost('appointments.php',{patient_id:patient_id,doctor_id:doctor_id,appt_date:date,appt_time:time+':00',type:type,notes:notes}).then(function(res){
+    btn.disabled=false; btn.textContent='Book Appointment';
+    if(res.success){closeModal('addAppt');showToast('Appointment booked! Ref: '+res.appt_ref,'✅');loadAppointments();}
+    else {showToast(res.error||'Booking failed','❌');}
+  }).catch(function(){btn.disabled=false;btn.textContent='Book Appointment';showToast('Server error','❌');});
+}
+
+// ── Load dropdowns for appointment modal ────────────────────
+function loadApptDropdowns(){
+  apiGet('patients.php').then(function(res){
+    if(!res.data)return;
+    var sel=document.getElementById('aa-patient');
+    sel.innerHTML='<option value="">Select patient...</option>';
+    res.data.forEach(function(p){sel.innerHTML+='<option value="'+p.id+'">'+p.name+' ('+p.patient_code+')</option>';});
+  }).catch(function(){});
+  apiGet('doctors.php').then(function(res){
+    if(!res.data)return;
+    var sel=document.getElementById('aa-doctor');
+    sel.innerHTML='<option value="">Select doctor...</option>';
+    res.data.forEach(function(d){sel.innerHTML+='<option value="'+d.id+'">'+d.name+' — '+d.specialization+'</option>';});
+  }).catch(function(){});
+}
+
+function loadInvoiceDropdowns(){
+  apiGet('patients.php').then(function(res){
+    if(!res.data)return;
+    var sel=document.getElementById('ai-patient');
+    if(!sel)return;
+    sel.innerHTML='<option value="">Select patient...</option>';
+    res.data.forEach(function(p){sel.innerHTML+='<option value="'+p.id+'">'+p.name+' ('+p.patient_code+')</option>';});
+  }).catch(function(){});
+}
+
+function doAddInvoice(){
+  var btn = document.getElementById('ai-submit-btn');
+  var patient_id = document.getElementById('ai-patient').value;
+  var service = document.getElementById('ai-service').value.trim();
+  var amount = document.getElementById('ai-amount').value;
+  var insurance = document.getElementById('ai-insurance').value || 0;
+  var due = document.getElementById('ai-due').value;
+  
+  if(!patient_id || !service || !amount){showToast('Please fill all required fields','⚠️');return;}
+  
+  btn.disabled=true; btn.textContent='Creating...';
+  apiPost('invoices.php', {
+    patient_id: patient_id,
+    service_name: service,
+    amount: amount,
+    insurance_coverage: insurance,
+    due_date: due
+  }).then(function(res){
+    btn.disabled=false; btn.textContent='Create Invoice';
+    if(res.success){
+      closeModal('addInvoice');
+      showToast('Invoice created! Ref: '+res.invoice_ref,'✅');
+      loadInvoices();
+    } else {
+      showToast(res.error||'Failed to create invoice','❌');
+    }
+  }).catch(function(){
+    btn.disabled=false; btn.textContent='Create Invoice';
+    showToast('Server error','❌');
+  });
+}
+
+// ── Search Patients ─────────────────────────────────────────
+var _allPatients = [];
+function searchPatients(query){
+  var q = query.toLowerCase();
+  var tbody = document.querySelector('#page-patients table tbody');
+  if(!tbody) return;
+  var filtered = q ? _allPatients.filter(function(p){
+    return p.name.toLowerCase().indexOf(q)!==-1 || p.patient_code.toLowerCase().indexOf(q)!==-1 || (p.email||'').toLowerCase().indexOf(q)!==-1;
+  }) : _allPatients;
+  renderPatientRows(filtered);
+}
+
+function renderPatientRows(data){
+  var tbody = document.querySelector('#page-patients table tbody');
+  if(!tbody) return;
+  var colors=['#0d6e72,#00bfa5','#1565c0,#3b82f6','#7c3aed,#a78bfa','#d97706,#fbbf24','#dc2626,#f87171','#059669,#34d399'];
+  var html='';
+  data.forEach(function(p,idx){
+    var initials=p.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+    var c=colors[idx%colors.length];
+    var statusBadge=p.status==='active'?'<span class="badge badge-green">Active</span>':p.status==='under_review'?'<span class="badge badge-amber">Review</span>':'<span class="badge badge-blue">'+p.status+'</span>';
+    html+='<tr><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,'+c+')">'+initials+'</div><div><div class="td-name">'+p.name+'</div><div class="td-id">'+p.email+'</div></div></div></td>';
+    html+='<td><span class="td-id">'+p.patient_code+'</span></td>';
+    html+='<td>'+(p.date_of_birth||'—')+'</td><td>'+(p.phone||'—')+'</td>';
+    html+='<td><span class="badge badge-teal">'+(p.blood_type||'—')+'</span></td><td>—</td>';
+    html+='<td>'+statusBadge+'</td>';
+    html+='<td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px" onclick="showToast(\'Patient: '+p.name+'\',\'👤\')">View</button></td></tr>';
+  });
+  tbody.innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No patients found</td></tr>';
+}
+
+// ── Appointment Tab Filtering ───────────────────────────────
+var _allAppointments = [];
+function setTab(el){
+  el.closest('.tabs').querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  var filter = el.textContent.trim().toLowerCase();
+  if(el.closest('.tabs').closest('#page-appointments')){
+    filterAppointments(filter);
+  }
+}
+function filterAppointments(status){
+  var tbody=document.querySelector('#page-appointments table tbody');
+  if(!tbody)return;
+  var data = status==='all' ? _allAppointments : _allAppointments.filter(function(a){return a.status===status;});
+  var html='';
+  data.forEach(function(a){
+    var sc=a.status==='completed'?'badge-green':a.status==='cancelled'?'badge-red':a.status==='pending'?'badge-amber':'badge-blue';
+    html+='<tr><td><span class="td-id">'+a.appt_ref+'</span></td><td>'+a.patient_name+'</td><td>'+a.doctor_name+'</td><td>'+a.department+'</td><td>'+a.appt_date+'</td><td>'+a.appt_time+'</td><td>'+a.type+'</td>';
+    html+='<td><span class="badge '+sc+'">'+a.status.charAt(0).toUpperCase()+a.status.slice(1)+'</span></td>';
+    html+='<td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>';
+  });
+  tbody.innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No appointments</td></tr>';
+}
+function updateApptStatus(id,status){
+  apiPut('appointments.php?id='+id,{id:id,status:status}).then(function(res){
+    if(res.success){showToast('Appointment '+status,'✅');loadAppointments();}
+    else{showToast(res.error||'Update failed','❌');}
+  }).catch(function(){showToast('Server error','❌');});
+}
+
+// ── Load Doctors Page ───────────────────────────────────────
+function loadDoctors(){
+  apiGet('doctors.php').then(function(res){
+    if(!res.data)return;
+    var container=document.querySelector('#page-doctors .grid-3');
+    if(!container)return;
+    var colors=['#0d2e5e,#1565c0','#1565c0,#3b82f6','#7c3aed,#a78bfa','#d97706,#fbbf24','#0891b2,#22d3ee','#9d174d,#f472b6'];
+    var html='';
+    res.data.forEach(function(d,idx){
+      var ini=d.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+      var c=colors[idx%colors.length];
+      var sBadge=d.status==='available'?'<span class="badge badge-green">● Available</span>':d.status==='busy'?'<span class="badge badge-red">● Busy</span>':'<span class="badge badge-amber">● '+d.status+'</span>';
+      html+='<div class="card" style="padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">';
+      html+='<div class="avatar" style="width:52px;height:52px;font-size:18px;background:linear-gradient(135deg,'+c+')">'+ini+'</div>';
+      html+='<div><div style="font-weight:700;font-size:14px">'+d.name+'</div><div style="font-size:12px;color:var(--teal);font-weight:600">'+d.specialization+'</div><div style="font-size:11px;color:var(--muted);margin-top:3px">'+d.department+'</div></div>';
+      html+=sBadge;
+      html+='<div style="display:flex;gap:6px;width:100%"><button class="btn btn-outline" style="flex:1;font-size:11px;padding:6px">Profile</button><button class="btn btn-primary" style="flex:1;font-size:11px;padding:6px">Schedule</button></div></div>';
+    });
+    container.innerHTML=html;
+  }).catch(function(e){console.error('loadDoctors:',e);});
+}
+
+// ── Load Beds from API ──────────────────────────────────────
+function loadBedsFromAPI(){
+  apiGet('beds.php').then(function(res){
+    if(!res.beds)return;
+    // Group by ward
+    var wardMap={};
+    res.beds.forEach(function(b){
+      if(!wardMap[b.ward_id])wardMap[b.ward_id]={name:b.ward_name,beds:[]};
+      wardMap[b.ward_id].beds.push(b);
+    });
+    // Update stats
+    var stats=document.querySelectorAll('#page-beds .mini-stat');
+    if(stats.length>=5&&res.wards){
+      var totalB=0,occ=0,avail=0,rsv=0,maint=0;
+      res.wards.forEach(function(w){totalB+=parseInt(w.bed_count)||0;occ+=parseInt(w.occupied)||0;avail+=parseInt(w.available)||0;rsv+=parseInt(w.reserved)||0;maint+=parseInt(w.maintenance)||0;});
+      stats[0].querySelector('.mini-stat-val').textContent=totalB;
+      stats[1].querySelector('.mini-stat-val').textContent=occ;
+      stats[2].querySelector('.mini-stat-val').textContent=avail;
+      stats[3].querySelector('.mini-stat-val').textContent=rsv;
+      stats[4].querySelector('.mini-stat-val').textContent=maint;
+    }
+    // Render bed grids
+    var grids={'cardio-beds':null,'neuro-beds':null,'ortho-beds':null,'peds-beds':null};
+    res.beds.forEach(function(b){
+      var gridId=null;
+      if(b.ward_name.indexOf('Cardiology')!==-1)gridId='cardio-beds';
+      else if(b.ward_name.indexOf('Neurology')!==-1)gridId='neuro-beds';
+      else if(b.ward_name.indexOf('Orthopedics')!==-1)gridId='ortho-beds';
+      else if(b.ward_name.indexOf('Pediatrics')!==-1)gridId='peds-beds';
+      if(!gridId)return;
+      var el=document.getElementById(gridId);
+      if(!el)return;
+      if(!grids[gridId]){grids[gridId]=true;el.innerHTML='';}
+      var div=document.createElement('div');
+      div.className='bed '+b.status;
+      div.innerHTML='🛏<br><span>'+b.bed_number+'</span>';
+      div.title='Bed '+b.bed_number+' — '+b.status;
+      div.onclick=function(){showToast('Bed '+b.bed_number+' — '+b.status,b.status==='available'?'✅':'🔴');};
+      el.appendChild(div);
+    });
+  }).catch(function(){renderBeds();});
+}
+
+// ── Load Dashboard KPI ──────────────────────────────────────
+function loadDashboardKPI(){
+  apiGet('patients.php').then(function(res){
+    if(!res.data)return;
+    var kpi=document.querySelector('#page-dashboard .kpi-grid .kpi-card:nth-child(1) .kpi-val');
+    if(kpi)kpi.textContent=res.total||res.data.length;
+  }).catch(function(){});
+  apiGet('appointments.php').then(function(res){
+    if(!res.data)return;
+    var kpi=document.querySelector('#page-dashboard .kpi-grid .kpi-card:nth-child(2) .kpi-val');
+    if(kpi)kpi.textContent=res.data.length;
+  }).catch(function(){});
+}
+
+// ── Invoice actions ─────────────────────────────────────────
+function payInvoice(id){
+  apiPut('invoices.php?id='+id,{id:id,status:'paid'}).then(function(res){
+    if(res.success){showToast('Payment recorded!','✅');loadInvoices();}
+    else{showToast(res.error||'Payment failed','❌');}
+  }).catch(function(){showToast('Server error','❌');});
+}
+
+// ── Override loadPatients to store data ─────────────────────
+function loadPatients(){
+  apiGet('patients.php').then(function(res){
+    if(!res.data)return;
+    _allPatients=res.data;
+    renderPatientRows(res.data);
+    var totalEl=document.querySelector('#page-patients .mini-stats .mini-stat:nth-child(1) .mini-stat-val');
+    if(totalEl)totalEl.textContent=res.total||res.data.length;
+    var activeCount=res.data.filter(function(p){return p.status==='active';}).length;
+    var reviewCount=res.data.filter(function(p){return p.status==='under_review';}).length;
+    var ae=document.querySelector('#page-patients .mini-stats .mini-stat:nth-child(2) .mini-stat-val');
+    var re=document.querySelector('#page-patients .mini-stats .mini-stat:nth-child(3) .mini-stat-val');
+    if(ae)ae.textContent=activeCount;
+    if(re)re.textContent=reviewCount;
+  }).catch(function(e){console.error('loadPatients:',e);});
+}
+
+// ── Override loadAppointments to store data ──────────────────
+function loadAppointments(){
+  apiGet('appointments.php').then(function(res){
+    if(!res.data)return;
+    _allAppointments=res.data;
+    filterAppointments('all');
+  }).catch(function(e){console.error('loadAppointments:',e);});
+}
+
+// ── Override loadInvoices with actions ───────────────────────
+function loadInvoices(){
+  apiGet('invoices.php').then(function(res){
+    if(!res.data)return;
+    var tbody=document.querySelector('#page-billing table tbody');
+    if(!tbody)return;
+    var html='';
+    res.data.forEach(function(inv){
+      var sc=inv.status==='paid'?'badge-green':inv.status==='overdue'?'badge-red':inv.status==='pending'?'badge-amber':'badge-blue';
+      var net=(parseFloat(inv.amount)-parseFloat(inv.insurance_coverage)).toFixed(0);
+      html+='<tr><td><span class="td-id">'+inv.invoice_ref+'</span></td><td>'+inv.patient_name+'</td><td>'+inv.service_name+'</td><td>'+(inv.created_at||'—')+'</td><td>EGP '+inv.amount+'</td><td>EGP '+inv.insurance_coverage+'</td><td style="font-weight:700">EGP '+net+'</td>';
+      html+='<td><span class="badge '+sc+'">'+inv.status.charAt(0).toUpperCase()+inv.status.slice(1)+'</span></td>';
+      html+='<td>';
+      if(inv.status==='pending'||inv.status==='issued'){html+='<button class="btn btn-primary" style="font-size:11px;padding:4px 8px" onclick="payInvoice(\''+inv.id+'\')">Pay</button>';}
+      else{html+='<button class="btn btn-outline" style="font-size:11px;padding:4px 8px">Receipt</button>';}
+      html+='</td></tr>';
+    });
+    tbody.innerHTML=html;
+  }).catch(function(e){console.error('loadInvoices:',e);});
+}
+
+// ── Init ─────────────────────────────────────────────────────
+window.addEventListener('load', function() {
+  setTimeout(renderDashboardCharts, 200);
+  loadBedsFromAPI();
+  loadPatients();
+  loadAppointments();
+  loadInvoices();
+  loadDoctors();
+  loadApptDropdowns();
+  loadInvoiceDropdowns();
+  loadDashboardKPI();
+});
+</script>
+</body>
+</html>

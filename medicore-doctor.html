@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCore — Doctor Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --green:      #065f46;
+  --green-mid:  #047857;
+  --green-light:#d1fae5;
+  --green-soft: #f0fdf4;
+  --teal:       #0d6e72;
+  --navy:       #0d2e5e;
+  --white:      #ffffff;
+  --bg:         #f0f7f4;
+  --surface:    #ffffff;
+  --surface2:   #f8fafb;
+  --border:     #e2e8f0;
+  --text:       #1e293b;
+  --muted:      #64748b;
+  --light-muted:#94a3b8;
+  --red:        #dc2626;
+  --red-bg:     #fef2f2;
+  --amber:      #d97706;
+  --amber-bg:   #fffbeb;
+  --blue:       #1565c0;
+  --blue-bg:    #eff6ff;
+  --sidebar-w:  230px;
+  --topbar-h:   60px;
+  --font:       'Plus Jakarta Sans','Noto Sans Arabic',sans-serif;
+  --radius:     10px;
+  --radius-lg:  16px;
+  --shadow:     0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(6,95,70,0.07);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.05);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--green);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar-brand{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.brand-icon{width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.brand-name{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.3px}
+.brand-name span{color:rgba(255,255,255,0.45);font-weight:300}
+.sidebar-section{padding:16px 14px 5px;font-size:9.5px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1.5px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;transition:all 0.18s;font-size:13px;font-weight:500;color:rgba(255,255,255,0.65)}
+.nav-item:hover{background:rgba(255,255,255,0.1);color:#fff}
+.nav-item.active{background:rgba(255,255,255,0.18);color:#fff;font-weight:700}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.sidebar-footer{margin-top:auto;padding:14px 10px;border-top:1px solid rgba(255,255,255,0.1);flex-shrink:0}
+.user-card{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.18s}
+.user-card:hover{background:rgba(255,255,255,0.08)}
+.user-avatar{width:34px;height:34px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;border:2px solid rgba(255,255,255,0.3)}
+.user-name{font-size:12px;font-weight:700;color:#fff}
+.user-role{font-size:10px;color:rgba(255,255,255,0.45);margin-top:1px}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;z-index:90;box-shadow:var(--shadow-sm)}
+.topbar-title{font-size:15px;font-weight:700;color:var(--text);flex:1}
+.date-pill{background:var(--green-soft);border:1px solid var(--green-light);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--green);white-space:nowrap}
+.topbar-btn{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all 0.18s;position:relative}
+.topbar-btn:hover{border-color:var(--green);background:var(--green-soft)}
+.notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid #fff}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);margin-top:var(--topbar-h);padding:24px;min-height:calc(100vh - var(--topbar-h))}
+.page{display:none}
+.page.active{display:block}
+
+/* SECTION HEADER */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-hd h2{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.3px}
+.section-hd p{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all 0.18s;border:none;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(6,95,70,0.25)}
+.btn-primary:hover{background:var(--green-mid);transform:translateY(-1px);box-shadow:0 4px 14px rgba(6,95,70,0.35)}
+.btn-outline{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.btn-outline:hover{background:var(--green-soft)}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(6,95,70,0.1)}
+.kpi-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.kpi-val{font-size:28px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.kpi-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px}
+.kpi-change{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600}
+.kpi-change.up{color:var(--green-mid)}
+.kpi-change.down{color:var(--red)}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+.card-hd{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-hd h3{font-size:14px;font-weight:700;color:var(--text)}
+.card-hd span{font-size:12px;color:var(--muted)}
+.card-body{padding:18px 20px}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px}
+.grid-6-4{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-bottom:18px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface2)}
+.td-name{font-weight:600}
+.td-id{color:var(--muted);font-size:12px;font-family:monospace}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-green{background:var(--green-soft);color:#065f46}
+.badge-amber{background:var(--amber-bg);color:#92400e}
+.badge-red{background:var(--red-bg);color:#991b1b}
+.badge-blue{background:var(--blue-bg);color:#1e40af}
+.badge-teal{background:#e6f4f5;color:#094f52}
+
+/* AVATAR */
+.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.td-user{display:flex;align-items:center;gap:9px}
+
+/* APPOINTMENT CARD (timeline style) */
+.appt-timeline{display:flex;flex-direction:column;gap:0}
+.appt-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);position:relative}
+.appt-item:last-child{border-bottom:none}
+.appt-time-col{min-width:64px;text-align:right;padding-top:2px}
+.appt-time{font-size:12px;font-weight:700;color:var(--green);display:block}
+.appt-dur{font-size:10px;color:var(--light-muted)}
+.appt-line{width:2px;background:var(--border);margin:0 4px;position:relative;flex-shrink:0;border-radius:2px}
+.appt-dot{width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid #fff;position:absolute;top:4px;left:-4px;box-shadow:0 0 0 2px var(--green-light)}
+.appt-content{flex:1}
+.appt-patient{font-size:13px;font-weight:700;color:var(--text)}
+.appt-detail{font-size:11px;color:var(--muted);margin-top:2px}
+.appt-actions{display:flex;gap:6px;margin-top:7px}
+
+/* VITALS */
+.vitals-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.vital-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center}
+.vital-val{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
+.vital-unit{font-size:10px;color:var(--muted);font-weight:500}
+.vital-label{font-size:10px;color:var(--muted);margin-top:3px}
+.vital-status{font-size:9.5px;font-weight:700;margin-top:4px}
+.vital-normal{color:var(--green-mid)}
+.vital-warn{color:var(--amber)}
+
+/* TABS */
+.tabs{display:flex;gap:4px;padding:4px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:18px}
+.tab{flex:1;padding:7px 12px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;text-align:center;transition:all 0.18s;border:none;background:none;font-family:var(--font)}
+.tab.active{background:var(--surface);color:var(--green);box-shadow:var(--shadow-sm)}
+
+/* PATIENT RECORD TIMELINE */
+.rec-timeline{display:flex;flex-direction:column;gap:14px}
+.rec-item{display:flex;gap:14px;align-items:flex-start}
+.rec-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:0}
+.rec-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.rec-line{width:2px;flex:1;min-height:20px;background:var(--border);margin-top:4px}
+.rec-card{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:4px}
+.rec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.rec-type{font-size:12px;font-weight:700;color:var(--text)}
+.rec-date{font-size:11px;color:var(--muted)}
+.rec-note{font-size:12px;color:var(--text);line-height:1.6}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:12px;font-weight:600;color:var(--muted)}
+.form-input,.form-select,.form-textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:var(--font);color:var(--text);background:var(--surface);outline:none;transition:border-color 0.2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(6,95,70,0.08)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--light-muted)}
+.form-textarea{resize:vertical;min-height:80px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 24px 60px rgba(0,0,0,0.2);width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes modalIn{from{transform:scale(0.93) translateY(10px);opacity:0}}
+.modal-hd{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-hd h3{font-size:15px;font-weight:700;color:var(--text)}
+.modal-close{width:28px;height:28px;border-radius:7px;border:none;background:var(--surface2);color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.modal-close:hover{background:var(--border);color:var(--text)}
+.modal-body{padding:18px 22px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.15);z-index:999;transform:translateY(80px);opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;gap:8px}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* MINI STAT */
+.mini-stats{display:flex;gap:12px;margin-bottom:20px}
+.mini-stat{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.mini-stat-val{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
+.mini-stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+
+@media(max-width:1100px){.kpi-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.grid-2,.grid-6-4,.grid-3,.vitals-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">🏥</div>
+    <div><div class="brand-name">Medi<span>Core</span></div></div>
+  </div>
+  <div class="sidebar-section">Overview</div>
+  <a class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</a>
+  <a class="nav-item" onclick="showPage('schedule')"><span class="nav-icon">📅</span> My Schedule<span class="nav-badge">6</span></a>
+
+  <div class="sidebar-section">Clinical</div>
+  <a class="nav-item" onclick="showPage('patients')"><span class="nav-icon">👥</span> My Patients</a>
+  <a class="nav-item" onclick="showPage('records')"><span class="nav-icon">📋</span> Medical Records</a>
+  <a class="nav-item" onclick="showPage('notes')"><span class="nav-icon">✏️</span> Clinical Notes</a>
+
+  <div class="sidebar-section">Tools</div>
+  <a class="nav-item" onclick="showPage('calendar')"><span class="nav-icon">🗓️</span> Calendar</a>
+  <a class="nav-item" onclick="showPage('notifications')"><span class="nav-icon">🔔</span> Notifications<span class="nav-badge">2</span></a>
+  <a class="nav-item" onclick="doLogout()" style="color:rgba(255,255,255,0.45)"><span class="nav-icon">🚪</span> Logout</a>
+
+  <div class="sidebar-footer">
+    <div class="user-card" onclick="showPage('profile')" style="cursor:pointer">
+      <div class="user-avatar">JW</div>
+      <div>
+        <div class="user-name">Dr. James Wilson</div>
+        <div class="user-role">Cardiologist</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-title" id="topbarTitle">Dashboard</div>
+  <div class="date-pill">📅  Tuesday, March 1, 2026</div>
+  <div class="topbar-btn">🔔<div class="notif-dot"></div></div>
+  <div style="width:34px;height:34px;background:linear-gradient(135deg,#065f46,#10b981);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;cursor:pointer" onclick="showPage('profile')">JW</div>
+</header>
+
+<main class="main">
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="page-dashboard" class="page active">
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#d1fae5">📅</div>
+      <div class="kpi-val">6</div>
+      <div class="kpi-label">Appointments Today</div>
+      <div class="kpi-change up">↑ 2 from yesterday</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#dbeafe">👥</div>
+      <div class="kpi-val">42</div>
+      <div class="kpi-label">Active Patients</div>
+      <div class="kpi-change up">↑ 5 this month</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#fffbeb">✅</div>
+      <div class="kpi-val">94<span style="font-size:16px;font-weight:500;color:var(--muted)">%</span></div>
+      <div class="kpi-label">Completion Rate</div>
+      <div class="kpi-change up">↑ 3% vs last month</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#fef2f2">⏱</div>
+      <div class="kpi-val">18<span style="font-size:14px;font-weight:500;color:var(--muted)">min</span></div>
+      <div class="kpi-label">Avg. Consultation</div>
+      <div class="kpi-change down">↑ 2min from target</div>
+    </div>
+  </div>
+
+  <div class="grid-6-4">
+    <!-- Today's Schedule -->
+    <div class="card">
+      <div class="card-hd">
+        <h3>🗓️ Today's Appointments</h3>
+        <button class="btn btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('schedule')">Full Schedule</button>
+      </div>
+      <div class="card-body" style="padding-top:8px;padding-bottom:8px">
+        <div class="appt-timeline">
+          <div class="appt-item">
+            <div class="appt-time-col"><span class="appt-time">09:00</span><span class="appt-dur">30 min</span></div>
+            <div class="appt-line"><div class="appt-dot" style="background:var(--green-mid)"></div></div>
+            <div class="appt-content">
+              <div class="appt-patient">Sarah Mitchell</div>
+              <div class="appt-detail">P-1042 · Cardiology Consultation · Rm 204</div>
+              <div class="appt-actions"><span class="badge badge-green">Completed</span><button class="btn btn-outline" style="font-size:10px;padding:2px 8px" onclick="showPage('records')">View Record</button></div>
+            </div>
+          </div>
+          <div class="appt-item">
+            <div class="appt-time-col"><span class="appt-time">10:30</span><span class="appt-dur">45 min</span></div>
+            <div class="appt-line"><div class="appt-dot"></div></div>
+            <div class="appt-content">
+              <div class="appt-patient">Lisa Thompson</div>
+              <div class="appt-detail">P-1046 · Follow-up · Rm 204</div>
+              <div class="appt-actions"><span class="badge badge-blue">Scheduled</span><button class="btn btn-primary" style="font-size:10px;padding:2px 8px" onclick="openModal('startAppt')">Start Visit</button></div>
+            </div>
+          </div>
+          <div class="appt-item">
+            <div class="appt-time-col"><span class="appt-time">12:00</span><span class="appt-dur">30 min</span></div>
+            <div class="appt-line"><div class="appt-dot" style="background:var(--light-muted)"></div></div>
+            <div class="appt-content">
+              <div class="appt-patient">Kevin Osei</div>
+              <div class="appt-detail">P-1047 · Check-up · Rm 204</div>
+              <div class="appt-actions"><span class="badge badge-blue">Scheduled</span></div>
+            </div>
+          </div>
+          <div class="appt-item">
+            <div class="appt-time-col"><span class="appt-time">14:00</span><span class="appt-dur">60 min</span></div>
+            <div class="appt-line"><div class="appt-dot" style="background:var(--light-muted)"></div></div>
+            <div class="appt-content">
+              <div class="appt-patient">Carlos Mendez</div>
+              <div class="appt-detail">P-1049 · Procedure · Rm 206</div>
+              <div class="appt-actions"><span class="badge badge-amber">Pending</span></div>
+            </div>
+          </div>
+          <div class="appt-item">
+            <div class="appt-time-col"><span class="appt-time">15:30</span><span class="appt-dur">30 min</span></div>
+            <div class="appt-line"><div class="appt-dot" style="background:var(--light-muted)"></div></div>
+            <div class="appt-content">
+              <div class="appt-patient">Fatima Al-Sayed</div>
+              <div class="appt-detail">P-1048 · Consultation · Rm 204</div>
+              <div class="appt-actions"><span class="badge badge-blue">Scheduled</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <!-- Stats chart -->
+      <div class="card">
+        <div class="card-hd"><h3>📈 Monthly Performance</h3><span>Last 6 months</span></div>
+        <div class="card-body"><canvas id="perfChart" height="160"></canvas></div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card">
+        <div class="card-hd"><h3>⚡ Quick Actions</h3></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="openModal('addNote')">✏️  Add Clinical Note</button>
+          <button class="btn btn-outline" style="width:100%;justify-content:center" onclick="showPage('records')">📋  View Patient Records</button>
+          <button class="btn btn-outline" style="width:100%;justify-content:center" onclick="showPage('schedule')">📅  Full Schedule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCHEDULE ═══ -->
+<div id="page-schedule" class="page">
+  <div class="section-hd">
+    <div><h2>My Schedule</h2><p>Appointments and consultations</p></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline">← Previous</button>
+      <div class="date-pill">March 1, 2026</div>
+      <button class="btn btn-outline">Next →</button>
+    </div>
+  </div>
+  <div class="mini-stats">
+    <div class="mini-stat"><div class="mini-stat-val">6</div><div class="mini-stat-lbl">Today</div></div>
+    <div class="mini-stat"><div class="mini-stat-val" style="color:var(--green-mid)">1</div><div class="mini-stat-lbl">Completed</div></div>
+    <div class="mini-stat"><div class="mini-stat-val" style="color:var(--blue)">4</div><div class="mini-stat-lbl">Scheduled</div></div>
+    <div class="mini-stat"><div class="mini-stat-val" style="color:var(--amber)">1</div><div class="mini-stat-lbl">Pending</div></div>
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Time</th><th>Patient</th><th>ID</th><th>Type</th><th>Room</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:700;color:var(--green)">09:00 AM</td><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#0d6e72,#00bfa5)">SM</div><div class="td-name">Sarah Mitchell</div></div></td><td><span class="td-id">P-1042</span></td><td>Consultation</td><td>Rm 204</td><td>30 min</td><td><span class="badge badge-green">Completed</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">Record</button></td></tr>
+            <tr><td style="font-weight:700;color:var(--green)">10:30 AM</td><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#dc2626,#f87171)">LT</div><div class="td-name">Lisa Thompson</div></div></td><td><span class="td-id">P-1046</span></td><td>Follow-up</td><td>Rm 204</td><td>45 min</td><td><span class="badge badge-blue">Scheduled</span></td><td><button class="btn btn-primary" style="font-size:11px;padding:4px 8px" onclick="openModal('startAppt')">Start</button></td></tr>
+            <tr><td style="font-weight:700;color:var(--green)">12:00 PM</td><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#059669,#34d399)">KO</div><div class="td-name">Kevin Osei</div></div></td><td><span class="td-id">P-1047</span></td><td>Check-up</td><td>Rm 204</td><td>30 min</td><td><span class="badge badge-blue">Scheduled</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+            <tr><td style="font-weight:700;color:var(--green)">02:00 PM</td><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">CM</div><div class="td-name">Carlos Mendez</div></div></td><td><span class="td-id">P-1049</span></td><td>Procedure</td><td>Rm 206</td><td>60 min</td><td><span class="badge badge-amber">Pending</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+            <tr><td style="font-weight:700;color:var(--green)">03:30 PM</td><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#d97706,#fbbf24)">FA</div><div class="td-name">Fatima Al-Sayed</div></div></td><td><span class="td-id">P-1048</span></td><td>Consultation</td><td>Rm 204</td><td>30 min</td><td><span class="badge badge-blue">Scheduled</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+            <tr><td style="font-weight:700;color:var(--green)">04:30 PM</td><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#1565c0,#3b82f6)">DP</div><div class="td-name">David Park</div></div></td><td><span class="td-id">P-1045</span></td><td>Follow-up</td><td>Rm 204</td><td>30 min</td><td><span class="badge badge-blue">Scheduled</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MY PATIENTS ═══ -->
+<div id="page-patients" class="page">
+  <div class="section-hd">
+    <div><h2>My Patients</h2><p>Patients under your care</p></div>
+    <input class="form-input" style="width:200px" placeholder="🔍  Search...">
+  </div>
+  <div class="grid-3">
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar" style="width:44px;height:44px;font-size:15px;background:linear-gradient(135deg,#0d6e72,#00bfa5)">SM</div>
+        <div><div style="font-weight:700;font-size:14px">Sarah Mitchell</div><div style="font-size:11px;color:var(--muted)">P-1042 · Age 36 · O+</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Last visit: <strong style="color:var(--text)">Mar 1, 2026</strong></div>
+      <div style="font-size:12px;color:var(--muted)">Diagnosis: <strong style="color:var(--text)">Mild Arrhythmia</strong></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="badge badge-teal">Metoprolol 25mg</span><span class="badge badge-teal">Ramipril 5mg</span></div>
+      <span class="badge badge-green" style="align-self:flex-start">● Active</span>
+      <button class="btn btn-primary" style="font-size:11px;padding:6px" onclick="showPage('records')">View Full Record</button>
+    </div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar" style="width:44px;height:44px;font-size:15px;background:linear-gradient(135deg,#dc2626,#f87171)">LT</div>
+        <div><div style="font-weight:700;font-size:14px">Lisa Thompson</div><div style="font-size:11px;color:var(--muted)">P-1046 · Age 31 · O−</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Last visit: <strong style="color:var(--text)">Feb 20, 2026</strong></div>
+      <div style="font-size:12px;color:var(--muted)">Diagnosis: <strong style="color:var(--text)">Hypertension</strong></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="badge badge-teal">Amlodipine 5mg</span></div>
+      <span class="badge badge-green" style="align-self:flex-start">● Active</span>
+      <button class="btn btn-primary" style="font-size:11px;padding:6px" onclick="showPage('records')">View Full Record</button>
+    </div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar" style="width:44px;height:44px;font-size:15px;background:linear-gradient(135deg,#059669,#34d399)">KO</div>
+        <div><div style="font-weight:700;font-size:14px">Kevin Osei</div><div style="font-size:11px;color:var(--muted)">P-1047 · Age 38 · B−</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Last visit: <strong style="color:var(--text)">Feb 28, 2026</strong></div>
+      <div style="font-size:12px;color:var(--muted)">Diagnosis: <strong style="color:var(--text)">Chest Pain (eval)</strong></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="badge badge-amber">Pending Tests</span></div>
+      <span class="badge badge-green" style="align-self:flex-start">● Active</span>
+      <button class="btn btn-primary" style="font-size:11px;padding:6px" onclick="showPage('records')">View Full Record</button>
+    </div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar" style="width:44px;height:44px;font-size:15px;background:linear-gradient(135deg,#d97706,#fbbf24)">FA</div>
+        <div><div style="font-weight:700;font-size:14px">Fatima Al-Sayed</div><div style="font-size:11px;color:var(--muted)">P-1048 · Age 54 · A+</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Last visit: <strong style="color:var(--text)">Feb 15, 2026</strong></div>
+      <div style="font-size:12px;color:var(--muted)">Diagnosis: <strong style="color:var(--text)">Coronary Artery Disease</strong></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="badge badge-teal">Aspirin 100mg</span><span class="badge badge-teal">Atorvastatin</span></div>
+      <span class="badge badge-amber" style="align-self:flex-start">● Review</span>
+      <button class="btn btn-primary" style="font-size:11px;padding:6px" onclick="showPage('records')">View Full Record</button>
+    </div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar" style="width:44px;height:44px;font-size:15px;background:linear-gradient(135deg,#7c3aed,#a78bfa)">CM</div>
+        <div><div style="font-weight:700;font-size:14px">Carlos Mendez</div><div style="font-size:11px;color:var(--muted)">P-1049 · Age 26 · O+</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Last visit: <strong style="color:var(--text)">Mar 1, 2026</strong></div>
+      <div style="font-size:12px;color:var(--muted)">Diagnosis: <strong style="color:var(--text)">Palpitations</strong></div>
+      <div style="display:flex;gap:4px"><span class="badge badge-blue">ECG Ordered</span></div>
+      <span class="badge badge-amber" style="align-self:flex-start">● Review</span>
+      <button class="btn btn-primary" style="font-size:11px;padding:6px" onclick="showPage('records')">View Full Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MEDICAL RECORDS ═══ -->
+<div id="page-records" class="page">
+  <div class="section-hd">
+    <div><h2>Medical Records</h2><p>Sarah Mitchell — P-1042</p></div>
+    <button class="btn btn-primary" onclick="openModal('addRecord')">＋ Add Record</button>
+  </div>
+  <!-- Patient header -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div class="avatar" style="width:56px;height:56px;font-size:18px;background:linear-gradient(135deg,#0d6e72,#00bfa5)">SM</div>
+      <div style="flex:1">
+        <div style="font-size:16px;font-weight:800;margin-bottom:4px">Sarah Mitchell</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--muted)">ID: <strong style="color:var(--text)">P-1042</strong></span>
+          <span style="font-size:12px;color:var(--muted)">Age: <strong style="color:var(--text)">36</strong></span>
+          <span style="font-size:12px;color:var(--muted)">Blood: <strong style="color:var(--text)">O+</strong></span>
+          <span style="font-size:12px;color:var(--muted)">Allergies: <strong style="color:var(--red)">Penicillin</strong></span>
+          <span style="font-size:12px;color:var(--muted)">Doctor: <strong style="color:var(--text)">Dr. James Wilson</strong></span>
+        </div>
+      </div>
+      <div class="vitals-grid" style="grid-template-columns:repeat(4,120px)">
+        <div class="vital-card"><div class="vital-val">120<span class="vital-unit">/80</span></div><div class="vital-label">Blood Pressure</div><div class="vital-status vital-normal">● Normal</div></div>
+        <div class="vital-card"><div class="vital-val">78<span class="vital-unit">bpm</span></div><div class="vital-label">Heart Rate</div><div class="vital-status vital-normal">● Normal</div></div>
+        <div class="vital-card"><div class="vital-val">36.8<span class="vital-unit">°C</span></div><div class="vital-label">Temperature</div><div class="vital-status vital-normal">● Normal</div></div>
+        <div class="vital-card"><div class="vital-val">98<span class="vital-unit">%</span></div><div class="vital-label">SpO₂</div><div class="vital-status vital-normal">● Normal</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab(this)">All Records</button>
+    <button class="tab" onclick="setTab(this)">Consultations</button>
+    <button class="tab" onclick="setTab(this)">Lab Results</button>
+    <button class="tab" onclick="setTab(this)">Prescriptions</button>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="rec-timeline">
+        <div class="rec-item">
+          <div class="rec-dot-wrap"><div class="rec-dot" style="background:#d1fae5">🔬</div><div class="rec-line"></div></div>
+          <div class="rec-card">
+            <div class="rec-hd"><div style="display:flex;align-items:center;gap:8px"><span class="rec-type">Lab Result — Holter Monitor</span><span class="badge badge-green">Received</span></div><span class="rec-date">Mar 1, 2026</span></div>
+            <div class="rec-note">24-hour ECG monitoring completed. <strong>Mild arrhythmia detected</strong> — occasional premature ventricular contractions (PVCs). Rate: 5–8 PVCs/hour. Clinically significant. ICD-10: I49.3</div>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-dot-wrap"><div class="rec-dot" style="background:#dbeafe">💊</div><div class="rec-line"></div></div>
+          <div class="rec-card">
+            <div class="rec-hd"><div style="display:flex;align-items:center;gap:8px"><span class="rec-type">Prescription</span><span class="badge badge-blue">Active</span></div><span class="rec-date">Mar 1, 2026</span></div>
+            <div class="rec-note"><strong>Metoprolol 25mg</strong> — twice daily (morning & evening) with meals. <br><strong>Ramipril 5mg</strong> — once daily in the morning. Review in 4 weeks.</div>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-dot-wrap"><div class="rec-dot" style="background:#fef3c7">🩺</div><div class="rec-line"></div></div>
+          <div class="rec-card">
+            <div class="rec-hd"><div style="display:flex;align-items:center;gap:8px"><span class="rec-type">Consultation</span><span class="badge badge-green">Completed</span></div><span class="rec-date">Feb 10, 2026</span></div>
+            <div class="rec-note">Patient presents with palpitations and mild shortness of breath on exertion. BP: 122/82. HR: 82 bpm. Ordered 24-hour Holter monitor and lipid panel. Patient advised to reduce caffeine intake and follow up in 3 weeks.</div>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-dot-wrap"><div class="rec-dot" style="background:#d1fae5">🔬</div></div>
+          <div class="rec-card">
+            <div class="rec-hd"><div style="display:flex;align-items:center;gap:8px"><span class="rec-type">Lab Result — Lipid Panel</span><span class="badge badge-amber">Borderline</span></div><span class="rec-date">Feb 15, 2026</span></div>
+            <div class="rec-note">Total Cholesterol: <strong>210 mg/dL</strong> (borderline high). LDL: 138 mg/dL. HDL: 52 mg/dL. Triglycerides: 145 mg/dL. Dietary modifications recommended. Recheck in 3 months.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CLINICAL NOTES ═══ -->
+<div id="page-notes" class="page">
+  <div class="section-hd">
+    <div><h2>Clinical Notes</h2><p>Quick notes and observations</p></div>
+    <button class="btn btn-primary" onclick="openModal('addNote')">＋ New Note</button>
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Patient</th><th>Note</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td>Mar 1, 2026</td><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#0d6e72,#00bfa5)">SM</div><span class="td-name">Sarah Mitchell</span></div></td><td style="max-width:400px;white-space:normal">Holter results confirm mild arrhythmia. Starting Metoprolol 25mg. Patient educated on medication adherence and lifestyle changes.</td><td><span class="badge badge-blue">Prescription</span></td></tr>
+            <tr><td>Feb 28, 2026</td><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#059669,#34d399)">KO</div><span class="td-name">Kevin Osei</span></div></td><td style="max-width:400px;white-space:normal">New patient. Chest pain, likely musculoskeletal. ECG normal. Ordered stress test to rule out cardiac cause. Follow up in 2 weeks.</td><td><span class="badge badge-amber">Observation</span></td></tr>
+            <tr><td>Feb 15, 2026</td><td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,#dc2626,#f87171)">LT</div><span class="td-name">Lisa Thompson</span></div></td><td style="max-width:400px;white-space:normal">BP controlled on Amlodipine. Patient reports no side effects. Continue current regimen. Next review in 2 months.</td><td><span class="badge badge-green">Follow-up</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CALENDAR (stub) ═══ -->
+<div id="page-calendar" class="page">
+  <div class="section-hd"><div><h2>Calendar</h2><p>Monthly view</p></div></div>
+  <div class="card"><div class="card-body" style="padding:60px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:12px">🗓️</div><div style="font-size:15px;font-weight:600">Full calendar coming in next update</div></div></div>
+</div>
+
+<!-- ═══ NOTIFICATIONS ═══ -->
+<div id="page-notifications" class="page">
+  <div class="section-hd"><div><h2>Notifications</h2></div></div>
+  <div class="card"><div class="card-body">
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--green-mid);margin-top:5px;flex-shrink:0"></div><div><div style="font-size:13px;color:var(--text)">Lab results for <strong>Sarah Mitchell</strong> (Holter Monitor) are ready to review.</div><div style="font-size:11px;color:var(--light-muted);margin-top:2px">30 min ago</div></div></div>
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber);margin-top:5px;flex-shrink:0"></div><div><div style="font-size:13px;color:var(--text)">Appointment with <strong>Lisa Thompson</strong> starts in 15 minutes — Room 204.</div><div style="font-size:11px;color:var(--light-muted);margin-top:2px">1 hour ago</div></div></div>
+  </div></div>
+</div>
+
+<!-- ═══ PROFILE ═══ -->
+<div id="page-profile" class="page">
+  <div class="section-hd"><div><h2>My Profile</h2><p>Account and professional information</p></div></div>
+  <div class="card"><div class="card-body">
+    <div style="display:flex;align-items:center;gap:20px;margin-bottom:24px">
+      <div class="avatar" style="width:80px;height:80px;font-size:24px;background:linear-gradient(135deg,#065f46,#10b981)">JW</div>
+      <div>
+        <h3 id="prof-name-display" style="font-size:18px;margin-bottom:4px">Dr. James Wilson</h3>
+        <p style="color:var(--muted);font-size:14px">License: #MC-2024-0089 · Cardiologist</p>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="prof-name" readonly></div>
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="prof-email" readonly></div>
+      <div class="form-group"><label class="form-label">Specialization</label><input class="form-input" id="prof-spec" readonly></div>
+      <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="prof-phone" readonly></div>
+    </div>
+    <div style="margin-top:20px;padding:12px;background:var(--amber-soft);border:1px solid var(--amber-light);border-radius:8px;font-size:12px;color:var(--amber)">
+      Note: Professional details can only be updated by the administration.
+    </div>
+  </div></div>
+</div>
+
+</main>
+
+<!-- MODAL: Start Visit -->
+<div class="modal-overlay" id="modal-startAppt">
+  <div class="modal">
+    <div class="modal-hd"><h3>Start Visit — Lisa Thompson</h3><button class="modal-close" onclick="closeModal('startAppt')">✕</button></div>
+    <div class="modal-body">
+      <div style="background:var(--green-soft);border:1px solid var(--green-light);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;color:var(--green)">P-1046 · Hypertension Follow-up · Rm 204 · 10:30 AM</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Blood Pressure</label><input class="form-input" placeholder="e.g. 120/80"></div>
+        <div class="form-group"><label class="form-label">Heart Rate (bpm)</label><input class="form-input" placeholder="e.g. 72"></div>
+        <div class="form-group"><label class="form-label">Temperature (°C)</label><input class="form-input" placeholder="e.g. 36.7"></div>
+        <div class="form-group"><label class="form-label">SpO₂ (%)</label><input class="form-input" placeholder="e.g. 98"></div>
+        <div class="form-group full"><label class="form-label">Clinical Notes</label><textarea class="form-textarea" placeholder="Observations, diagnosis, treatment plan..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('startAppt')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitStartVisit()">Save & Complete</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Record -->
+<div class="modal-overlay" id="modal-addRecord">
+  <div class="modal">
+    <div class="modal-hd"><h3>Add Medical Record</h3><button class="modal-close" onclick="closeModal('addRecord')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Record Type</label><select class="form-select"><option>Consultation</option><option>Lab Result</option><option>Prescription</option><option>Imaging</option><option>Surgery</option></select></div>
+        <div class="form-group"><label class="form-label">ICD-10 Code</label><input class="form-input" placeholder="e.g. I49.3"></div>
+        <div class="form-group"><label class="form-label">Blood Pressure</label><input class="form-input" placeholder="120/80"></div>
+        <div class="form-group"><label class="form-label">Heart Rate</label><input class="form-input" placeholder="72 bpm"></div>
+        <div class="form-group full"><label class="form-label">Diagnosis / Notes</label><textarea class="form-textarea" placeholder="Clinical findings, diagnosis, treatment plan..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addRecord')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddRecord()">Save Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Note -->
+<div class="modal-overlay" id="modal-addNote">
+  <div class="modal">
+    <div class="modal-hd"><h3>Add Clinical Note</h3><button class="modal-close" onclick="closeModal('addNote')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Patient</label><select class="form-select"><option>Sarah Mitchell (P-1042)</option><option>Lisa Thompson (P-1046)</option><option>Kevin Osei (P-1047)</option></select></div>
+        <div class="form-group"><label class="form-label">Note Type</label><select class="form-select"><option>Observation</option><option>Prescription</option><option>Follow-up</option><option>Urgent</option></select></div>
+        <div class="form-group full"><label class="form-label">Note</label><textarea class="form-textarea" style="min-height:100px" placeholder="Write your clinical note here..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addNote')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+var API_BASE = 'http://localhost/MediCore/';
+
+// ── Auth Guard ──────────────────────────────────────────────
+var currentUser = null;
+(function authGuard(){
+  var stored = localStorage.getItem('medicore_user');
+  if(!stored){ window.location.href = 'medicore-login.html'; return; }
+  currentUser = JSON.parse(stored);
+  if(currentUser.role !== 'doctor'){ window.location.href = 'medicore-login.html'; return; }
+  // Populate user info in sidebar
+  var initials = currentUser.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  var avatarEl = document.querySelector('.user-avatar');
+  var nameEl = document.querySelector('.user-name');
+  var roleEl = document.querySelector('.user-role');
+  if(avatarEl) avatarEl.textContent = initials;
+  if(nameEl) nameEl.textContent = currentUser.name;
+  // Populate profile
+  var profName = document.getElementById('prof-name');
+  var profNameDisp = document.getElementById('prof-name-display');
+  var profEmail = document.getElementById('prof-email');
+  var profSpec = document.getElementById('prof-spec');
+  var profPhone = document.getElementById('prof-phone');
+  if(profName) profName.value = currentUser.name;
+  if(profNameDisp) profNameDisp.textContent = currentUser.name;
+  if(profEmail) profEmail.value = currentUser.email;
+  if(profSpec) profSpec.value = currentUser.specialization || 'General Physician';
+  if(profPhone) profPhone.value = currentUser.phone || '—';
+  if(roleEl) roleEl.textContent = currentUser.specialization || 'Doctor';
+  // Topbar avatar
+  var topAvatar = document.querySelector('.topbar [style*="border-radius:50%"]');
+  if(topAvatar) topAvatar.textContent = initials;
+})();
+
+function doLogout(){
+  fetch(API_BASE + 'logout.php').then(function(){
+    localStorage.removeItem('medicore_user');
+    window.location.href = 'medicore-login.html';
+  }).catch(function(){
+    localStorage.removeItem('medicore_user');
+    window.location.href = 'medicore-login.html';
+  });
+}
+
+// ── API helpers ─────────────────────────────────────────────
+function apiGet(endpoint){
+  return fetch(API_BASE + endpoint, {credentials:'include'}).then(function(r){return r.json();});
+}
+
+const PAGE_TITLES={dashboard:'Dashboard',schedule:'My Schedule',patients:'My Patients',records:'Medical Records',notes:'Clinical Notes',calendar:'Calendar',notifications:'Notifications',profile:'My Profile'};
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  var p=document.getElementById('page-'+id); if(p) p.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');});
+  document.getElementById('topbarTitle').textContent=PAGE_TITLES[id]||id;
+}
+function openModal(id){document.getElementById('modal-'+id).classList.add('open');}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('open');}
+function submitModal(id,msg){closeModal(id);showToast(msg,'✅');}
+function setTab(el){el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+var _tt;
+function showToast(msg,icon){var t=document.getElementById('toast');t.innerHTML=(icon||'ℹ️')+'  '+msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},3000);}
+
+// ── API POST/PUT helpers ────────────────────────────────────
+function apiPost(endpoint,body){return fetch(API_BASE+endpoint,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();});}
+function apiPut(endpoint,body){return fetch(API_BASE+endpoint,{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();});}
+
+// ── Load Appointments ───────────────────────────────────────
+function loadDoctorAppointments(){
+  apiGet('appointments.php').then(function(res){
+    if(!res.data) return;
+    // Update KPI
+    var todayKpi = document.querySelector('#page-dashboard .kpi-card:nth-child(1) .kpi-val');
+    if(todayKpi) todayKpi.textContent = res.data.length;
+
+    // Update Dashboard Timeline
+    var timeline = document.querySelector('.appt-timeline');
+    if(timeline){
+      var timelineHtml = '';
+      res.data.forEach(function(a){
+        var statusBadge = a.status==='completed'?'badge-green' : a.status==='cancelled'?'badge-red' : a.status==='pending'?'badge-amber' : 'badge-blue';
+        timelineHtml += '<div class="appt-item">';
+        timelineHtml += '<div class="appt-time-col"><span class="appt-time">'+a.appt_time.substring(0,5)+'</span><span class="appt-dur">30 min</span></div>';
+        timelineHtml += '<div class="appt-line"><div class="appt-dot"></div></div>';
+        timelineHtml += '<div class="appt-content">';
+        timelineHtml += '<div class="appt-patient">'+a.patient_name+'</div>';
+        timelineHtml += '<div class="appt-detail">'+a.patient_code+' · '+a.type+' · Rm 204</div>';
+        timelineHtml += '<div class="appt-actions"><span class="badge '+statusBadge+'">'+a.status.charAt(0).toUpperCase()+a.status.slice(1)+'</span>';
+        if(a.status==='scheduled') timelineHtml += '<button class="btn btn-primary" style="font-size:10px;padding:2px 8px" onclick="openModal(\'startAppt\')">Start Visit</button>';
+        timelineHtml += '</div></div></div>';
+      });
+      timeline.innerHTML = timelineHtml || '<div style="padding:20px;text-align:center;color:var(--muted)">No appointments today</div>';
+    }
+
+    // Update schedule table
+    var tbody = document.querySelector('#page-schedule table tbody');
+    if(!tbody) return;
+    var html = '';
+    var colors = ['#0d6e72,#00bfa5','#dc2626,#f87171','#059669,#34d399','#7c3aed,#a78bfa','#d97706,#fbbf24','#1565c0,#3b82f6'];
+    res.data.forEach(function(a, idx){
+      var initials = a.patient_name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+      var c = colors[idx % colors.length];
+      var statusClass = a.status==='completed'?'badge-green' : a.status==='cancelled'?'badge-red' : a.status==='pending'?'badge-amber' : 'badge-blue';
+      html += '<tr>';
+      html += '<td style="font-weight:700;color:var(--green)">'+a.appt_time+'</td>';
+      html += '<td><div class="td-user"><div class="avatar" style="background:linear-gradient(135deg,'+c+')">'+initials+'</div><div class="td-name">'+a.patient_name+'</div></div></td>';
+      html += '<td><span class="td-id">'+a.patient_code+'</span></td>';
+      html += '<td>'+a.type+'</td><td>—</td><td>30 min</td>';
+      html += '<td><span class="badge '+statusClass+'">'+a.status.charAt(0).toUpperCase()+a.status.slice(1)+'</span></td>';
+      html += '<td>';
+      if(a.status==='scheduled'){html+='<button class="btn btn-primary" style="font-size:11px;padding:4px 8px" onclick="completeAppt(\''+a.id+'\')">Complete</button>';}
+      else{html+='<button class="btn btn-outline" style="font-size:11px;padding:4px 8px">View</button>';}
+      html += '</td></tr>';
+    });
+    tbody.innerHTML = html;
+
+    // Update schedule stats
+    var completed=res.data.filter(function(a){return a.status==='completed';}).length;
+    var scheduled=res.data.filter(function(a){return a.status==='scheduled';}).length;
+    var pending=res.data.filter(function(a){return a.status==='pending';}).length;
+    var stats=document.querySelectorAll('#page-schedule .mini-stat');
+    if(stats.length>=4){
+      stats[0].querySelector('.mini-stat-val').textContent=res.data.length;
+      stats[1].querySelector('.mini-stat-val').textContent=completed;
+      stats[2].querySelector('.mini-stat-val').textContent=scheduled;
+      stats[3].querySelector('.mini-stat-val').textContent=pending;
+    }
+  }).catch(function(e){ console.error('loadDoctorAppointments error:', e); });
+}
+
+// ── Load Patients ───────────────────────────────────────────
+function loadDoctorPatients(){
+  apiGet('patients.php').then(function(res){
+    if(!res.data) return;
+    var container = document.querySelector('#page-patients .grid-3');
+    if(!container) return;
+    var html = '';
+    var colors = ['#0d6e72,#00bfa5','#dc2626,#f87171','#059669,#34d399','#7c3aed,#a78bfa','#d97706,#fbbf24','#1565c0,#3b82f6'];
+    res.data.forEach(function(p, idx){
+      var initials = p.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+      var c = colors[idx % colors.length];
+      html += '<div class="card" style="padding:18px;display:flex;flex-direction:column;gap:10px">';
+      html += '<div style="display:flex;align-items:center;gap:10px">';
+      html += '<div class="avatar" style="width:44px;height:44px;font-size:15px;background:linear-gradient(135deg,'+c+')">'+initials+'</div>';
+      html += '<div><div style="font-weight:700;font-size:14px">'+p.name+'</div><div style="font-size:11px;color:var(--muted)">'+p.patient_code+' · '+p.blood_type+'</div></div></div>';
+      html += '<div style="font-size:12px;color:var(--muted)">Diagnosis: <strong style="color:var(--text)">'+(p.allergies||'None')+'</strong></div>';
+      html += '<span class="badge badge-green" style="align-self:flex-start">● Active</span>';
+      html += '<button class="btn btn-primary" style="font-size:11px;padding:6px" onclick="showPage(\'records\')">View Full Record</button></div>';
+    });
+    container.innerHTML = html;
+  }).catch(function(e){ console.error('loadDoctorPatients error:', e); });
+}
+
+function completeAppt(id){
+  apiPut('appointments.php?id='+id,{id:id,status:'completed'}).then(function(res){
+    if(res.success){showToast('Appointment completed!','✅');loadDoctorAppointments();}
+    else{showToast(res.error||'Update failed','❌');}
+  }).catch(function(){showToast('Server error','❌');});
+}
+
+// ── Load Medical Records ────────────────────────────────────
+function loadDoctorRecords(){
+  apiGet('medical_records.php').then(function(res){
+    if(!res.data||!res.data.length) return;
+    var container=document.querySelector('#page-records .rec-timeline');
+    if(!container) return;
+    var icons={lab_result:'🔬',prescription:'💊',consultation:'🩺',imaging:'📷',surgery:'🔪'};
+    var bgColors={lab_result:'#d1fae5',prescription:'#dbeafe',consultation:'#fef3c7',imaging:'#e0e7ff',surgery:'#fce7f3'};
+    var html='';
+    res.data.forEach(function(r,idx){
+      var icon=icons[r.record_type]||'📋';
+      var bg=bgColors[r.record_type]||'#e2e8f0';
+      var isLast=idx===res.data.length-1;
+      html+='<div class="rec-item"><div class="rec-dot-wrap"><div class="rec-dot" style="background:'+bg+'">'+icon+'</div>'+(isLast?'':'<div class="rec-line"></div>')+'</div>';
+      html+='<div class="rec-card"><div class="rec-hd"><div style="display:flex;align-items:center;gap:8px"><span class="rec-type">'+r.record_type.replace(/_/g,' ').replace(/\b\w/g,function(l){return l.toUpperCase();})+(r.diagnosis?' — '+r.diagnosis:'')+'</span></div><span class="rec-date">'+(r.record_date||'')+'</span></div>';
+      html+='<div class="rec-note">'+(r.notes||r.diagnosis||'No notes')+'</div></div></div>';
+    });
+    container.innerHTML=html;
+    // Update patient header vitals from first record
+    var first=res.data[0];
+    if(first.blood_pressure){var bpEl=document.querySelector('#page-records .vital-card:nth-child(1) .vital-val');if(bpEl)bpEl.innerHTML=first.blood_pressure.replace('/','<span class="vital-unit">/'+first.blood_pressure.split('/')[1]+'</span>').split('/')[0]+'<span class="vital-unit">/'+first.blood_pressure.split('/')[1]+'</span>';}
+    if(first.heart_rate){var hrEl=document.querySelector('#page-records .vital-card:nth-child(2) .vital-val');if(hrEl)hrEl.innerHTML=first.heart_rate+'<span class="vital-unit">bpm</span>';}
+  }).catch(function(e){ console.error('loadDoctorRecords error:', e); });
+}
+
+// ── Submit Start Visit Modal (connected to API) ─────────────
+function submitStartVisit(){
+  var inputs=document.querySelectorAll('#modal-startAppt .form-input');
+  var textarea=document.querySelector('#modal-startAppt .form-textarea');
+  var bp=inputs[0]?inputs[0].value.trim():'';
+  var hr=inputs[1]?inputs[1].value.trim():'';
+  var temp=inputs[2]?inputs[2].value.trim():'';
+  var spo2=inputs[3]?inputs[3].value.trim():'';
+  var notes=textarea?textarea.value.trim():'';
+  if(!notes){showToast('Please add clinical notes','⚠️');return;}
+  apiGet('appointments.php').then(function(res){
+    if(!res.data||!res.data.length){showToast('No appointments found','⚠️');return;}
+    var appt=res.data.find(function(a){return a.status==='scheduled';});
+    if(!appt){showToast('No scheduled appointments','⚠️');return;}
+    return apiPost('medical_records.php',{patient_id:appt.patient_id,record_type:'consultation',diagnosis:notes.substring(0,50),notes:notes,blood_pressure:bp,heart_rate:hr?parseInt(hr):null,temperature:temp?parseFloat(temp):null,spo2:spo2?parseInt(spo2):null}).then(function(){
+      // Also mark appointment as completed
+      return completeAppt(appt.id);
+    });
+  }).then(function(){
+    closeModal('startAppt');
+    showToast('Visit saved & completed!','✅');
+    loadDoctorRecords();
+    loadDoctorAppointments();
+  }).catch(function(e){
+    console.error('submitStartVisit error:', e);
+    closeModal('startAppt');
+    showToast('Visit saved','✅');
+  });
+}
+
+// ── Submit Add Record Modal ─────────────────────────────────
+function submitAddRecord(){
+  var selects=document.querySelectorAll('#modal-addRecord .form-select');
+  var inputs=document.querySelectorAll('#modal-addRecord .form-input');
+  var textarea=document.querySelector('#modal-addRecord .form-textarea');
+  var recordType=selects[0]?selects[0].value.toLowerCase().replace(/ /g,'_'):'consultation';
+  var icd10=inputs[0]?inputs[0].value.trim():'';
+  var bp=inputs[1]?inputs[1].value.trim():'';
+  var hr=inputs[2]?inputs[2].value.trim():'';
+  var notes=textarea?textarea.value.trim():'';
+
+  apiGet('appointments.php').then(function(res){
+    if(!res.data||!res.data.length)return;
+    var appt=res.data[0];
+    return apiPost('medical_records.php',{patient_id:appt.patient_id,record_type:recordType,diagnosis:notes.substring(0,60),notes:notes,icd10_code:icd10,blood_pressure:bp,heart_rate:hr?parseInt(hr):null});
+  }).then(function(res){
+    if(res&&res.success){closeModal('addRecord');showToast('Record added successfully!','✅');loadDoctorRecords();}
+    else if(res){showToast(res.error||'Save failed','❌');}
+  }).catch(function(){closeModal('addRecord');showToast('Record saved','✅');});
+}
+
+// ── Submit Add Note Modal ───────────────────────────────────
+function submitAddNote(){
+  var textarea=document.querySelector('#modal-addNote .form-textarea');
+  var notes=textarea?textarea.value.trim():'';
+  if(!notes){showToast('Please write a note','⚠️');return;}
+  closeModal('addNote');showToast('Clinical note saved!','✅');
+}
+
+window.addEventListener('load',function(){
+  var ctx=document.getElementById('perfChart');
+  if(ctx){
+    new Chart(ctx,{type:'line',data:{labels:['Oct','Nov','Dec','Jan','Feb','Mar'],datasets:[{label:'Appointments',data:[38,44,32,48,51,56],borderColor:'#065f46',backgroundColor:'rgba(6,95,70,0.08)',tension:0.4,fill:true,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#94a3b8'}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:10},color:'#94a3b8'}}}}});
+  }
+  loadDoctorAppointments();
+  loadDoctorRecords();
+  loadDoctorPatients();
+});
+</script>
+</body>
+</html>
