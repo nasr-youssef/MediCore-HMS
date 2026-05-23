@@ -42,7 +42,8 @@ The system provides separate dashboards for Admins, Doctors, and Patients with s
 ## 👨‍💻 Team Members
 
 - Nasr Youssef
-- Add Your Team Members Here
+- Omar Abd-Elaziz
+- Fathy Ahmed
 
 ---
 
