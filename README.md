@@ -1,5 +1,12 @@
 # 🏥 MediCore HMS
 
+![HTML](https://img.shields.io/badge/HTML5-Frontend-orange)
+![CSS](https://img.shields.io/badge/CSS3-Styling-blue)
+![JavaScript](https://img.shields.io/badge/JavaScript-Interactive-yellow)
+![PHP](https://img.shields.io/badge/PHP-Backend-purple)
+![MySQL](https://img.shields.io/badge/MySQL-Database-green)
+![Status](https://img.shields.io/badge/Status-Completed-success)
+
 ## 📌 Overview
 
 MediCore is a Full-Stack Hospital Management System designed to streamline healthcare operations including patient management, appointment scheduling, billing, medical records, and hospital bed management.
