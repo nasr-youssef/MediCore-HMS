@@ -39,26 +39,6 @@ The system provides separate dashboards for Admins, Doctors, and Patients with s
 
 ---
 
-## 📸 Screenshots
-
-### Login Page
-
-(Add Screenshot Here)
-
-### Admin Dashboard
-
-(Add Screenshot Here)
-
-### Doctor Dashboard
-
-(Add Screenshot Here)
-
-### Patient Dashboard
-
-(Add Screenshot Here)
-
----
-
 ## 👨‍💻 Team Members
 
 - Nasr Youssef
